@@ -1,0 +1,173 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:
+  push:
+    branches: [ main, mcp-remote ]
+    paths:
+      - '**/requirements*.txt'
+      - '**/pyproject.toml'
+      - '**/Dockerfile'
+      - '**/*.py'
+
+jobs:
+  dependency-audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    
+    - name: Install audit tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety pip-audit bandit
+      # Note: semgrep is used via returntocorp/semgrep-action, not pip
+    
+    - name: Install project dependencies
+      run: pip install -e .
+    
+    - name: Run safety check
+      continue-on-error: false
+      run: |
+        safety check --json --output safety-report.json
+        if [ -f safety-report.json ]; then
+          echo "### Safety Report" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat safety-report.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Run pip-audit
+      continue-on-error: false
+      run: |
+        pip-audit --format json --output pip-audit-report.json
+        if [ -f pip-audit-report.json ]; then
+          echo "### Pip Audit Report" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat pip-audit-report.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-security-reports
+        path: |
+          safety-report.json
+          pip-audit-report.json
+      if: always()
+
+  code-security:
+    name: Code Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    
+    - name: Run Bandit
+      continue-on-error: false
+      run: |
+        pip install bandit
+        bandit -r src/ -f json -o bandit-report.json
+        echo "### Bandit Security Report" >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY
+        bandit -r src/ -f txt
+        echo '```' >> $GITHUB_STEP_SUMMARY
+    
+    - name: Run Semgrep
+      uses: semgrep/semgrep-action@v1
+      with:
+        config: auto
+      continue-on-error: false
+    
+    - name: Upload code security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: code-security-reports
+        path: bandit-report.json
+      if: always()
+
+  docker-security:
+    name: Docker Security Scan
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/mcp-remote'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@0.31.0
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+      continue-on-error: false
+    
+    - name: Upload Trivy results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+      if: always()
+    
+    - name: Dockerfile linting
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: Dockerfile
+        format: json
+        output-file: hadolint-report.json
+      continue-on-error: false
+    
+    - name: Upload Docker security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-security-reports
+        path: |
+          trivy-results.sarif
+          hadolint-report.json
+      if: always()
+
+  secrets-scan:
+    name: Secrets Detection
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: TruffleHog OSS
+      uses: trufflesecurity/trufflehog@v3.88.0
+      with:
+        path: ./
+        extra_args: --only-verified
+      continue-on-error: false
+
+    - name: Gitleaks (manual)
+      run: |
+        # Install gitleaks CLI (free version)
+        wget -q https://github.com/gitleaks/gitleaks/releases/download/v8.21.2/gitleaks_8.21.2_linux_x64.tar.gz
+        tar -xzf gitleaks_8.21.2_linux_x64.tar.gz
+        ./gitleaks detect --source . --verbose --report-path gitleaks-report.json
+        echo "### Gitleaks Report" >> $GITHUB_STEP_SUMMARY
+        if [ -f gitleaks-report.json ]; then
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat gitleaks-report.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        else
+          echo "No secrets detected" >> $GITHUB_STEP_SUMMARY
+        fi
+      continue-on-error: false

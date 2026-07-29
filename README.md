@@ -1,136 +1,99 @@
-# Wazuh Servidor MCP
+# 🛡️ Wazuh Servidor MCP (Model Context Protocol)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-2025--11--25-green.svg)](https://modelcontextprotocol.io/)
 
-**Talk to your SIEM.** Query alerts, hunt threats, check vulnerabilities, and trigger active responses across your Wazuh deployment through natural conversation with any AI assistant via Model Context Protocol (MCP).
+**Converse com o seu SIEM Wazuh em Português.** Consulte alertas, investigue ameaças com SOAR/DFIR, verifique vulnerabilidades (CVEs), gerencie regras, decodificadores e execute ações de resposta ativa no seu ambiente Wazuh através de conversação natural com assistentes de IA (Antigravity IDE, LM Studio, Claude Desktop, VS Code).
 
 ---
 
-## Features & Capabilities
+## 🚀 Recursos e Funcionalidades
 
-- **Alert & Event Search**: Query Elasticsearch/Indexer alerts, filter by severity, rule ID, or agent.
-- **Agent Management**: Monitor agent statuses, active processes, open ports, and configurations.
-- **Vulnerability Management**: Scan unpatched CVEs across agents.
-- **Active Response**: Block malicious IPs, isolate compromised hosts, terminate processes, and manage file quarantine.
-- **Verification & Rollback**: Check status of active response actions and undo them when needed.
-- **Security & RBAC**: Rate limiting, token-based authentication, log sanitization, and audit logging.
+- **78 Ferramentas de Segurança 100% em Português**: Ferramentas em `snake_case` prontas para uso por qualquer assistente MCP.
+- **Orquestrador de Triagem SOAR (`investigar_incidente_wazuh`)**: Investigação automática em 11 etapas (Alertas, Agente, Processos, Portas, Vulnerabilidades, IOCs, MITRE, FIM, Timeline, Risco e Contenção).
+- **Conformidade & Audit Regulatório**: Relatórios automatizados para **LGPD (Art. 46)**, **NIST SP 800-53** e **CIS Benchmark**.
+- **Gestão de Regras e Decodificadores**: Criação, modificação, testes (`wazuh-logtest`) e exclusão de regras e decodificadores XML customizados.
+- **Resposta Ativa e Contenção**: Bloqueio de IPs em firewall, isolamento de hosts comprometidos, encerramento de processos e quarentena de arquivos com rollback.
+- **Suporte Duplo (HTTP SSE e Stdio Proxy)**: Inclui o `wazuh-mcp-bridge.py` para integração direta em clientes stdio com zero fricção.
 
 ---
 
-## Ferramentas de Segurança Disponíveis (56 Ferramentas em Português)
+## 📊 Matriz das 78 Ferramentas de Segurança em Português
 
 | Categoria | Ferramentas | Descrição |
 |-----------|-------------|-----------|
-| **Alertas e Eventos** | `obter_alertas_wazuh` `obter_resumo_alertas_wazuh` `analisar_padroes_alertas` `buscar_eventos_seguranca` | Consulta, filtragem e análise comportamental de alertas e eventos |
-| **Agentes e Grupos** | `obter_agentes_wazuh` `obter_agentes_ativos_wazuh` `verificar_saude_agente` `obter_processos_agente` `obter_portas_agente` `obter_configuracao_agente` `obter_pacotes_agente` `obter_alteracoes_fim_agente` `gerenciar_grupos_agente` | Monitoramento de agentes, processos, portas, FIM/syscheck, pacotes instalados e gestão/criação/exclusão de grupos |
-| **Vulnerabilidades** | `obter_vulnerabilidades_wazuh` `obter_vulnerabilidades_criticas_wazuh` `obter_resumo_vulnerabilidades_wazuh` | Consulta de CVEs e pacotes vulneráveis por severidade |
-| **Regras e Testes** | `obter_resumo_regras_wazuh` `obter_detalhes_regra_wazuh` `testar_mensagem_log_wazuh` `criar_regra_customizada_wazuh` `modificar_regra_customizada_wazuh` `excluir_regra_customizada_wazuh` | Inspeção, simulação (`wazuh-logtest`), **criação, modificação e exclusão de regras XML customizadas** |
-| **Análise e Relatórios** | `analisar_ameaca_seguranca` `verificar_reputacao_ioc` `executar_avaliacao_risco` `obter_principais_ameacas_seguranca` `gerar_relatorio_seguranca` `executar_teste_conformidade` | Análise de ameaças, reputação de IOCs, cálculo de risco e conformidade (PCI-DSS, CIS, NIST) |
-| **Resposta Ativa** | `resposta_ativa_wazuh` `bloquear_ip_wazuh` `isolar_host_wazuh` `encerrar_processo_wazuh` `desabilitar_usuario_wazuh` `quarentena_arquivo_wazuh` `bloquear_firewall_wazuh` `negar_host_wazuh` `reiniciar_servico_wazuh` | Execução de ações defensivas diretas no ambiente |
-| **Verificação e Desfazer** | `verificar_ip_bloqueado_wazuh` `verificar_isolamento_agente_wazuh` `verificar_processo_wazuh` `verificar_status_usuario_wazuh` `verificar_quarentena_arquivo_wazuh` `desisolar_host_wazuh` `habilitar_usuario_wazuh` `restaurar_arquivo_wazuh` `permitir_firewall_wazuh` `permitir_host_wazuh` | Confirmação e rollback de remediações defensivas |
+| **Orquestração SOAR / DFIR** | `investigar_incidente_wazuh` | Investigação completa em 11 etapas com cálculo de risco (0-100) e plano de contenção |
+| **Alertas e Eventos** | `obter_alertas_wazuh` `obter_resumo_alertas_wazuh` `analisar_padroes_alertas` `buscar_eventos_seguranca` `obter_dashboard_alertas` | Consulta, filtragem, busca livre e dashboards executivos de alertas |
+| **Agentes e Infraestrutura** | `obter_agentes_wazuh` `obter_agentes_ativos_wazuh` `verificar_saude_agente` `obter_processos_agente` `obter_portas_agente` `obter_configuracao_agente` `obter_pacotes_agente` `gerenciar_grupos_agente` | Monitoramento completo de agentes, processos, portas e gestão de grupos |
+| **Integridade de Arquivos (FIM)** | `obter_alteracoes_fim_agente` `obter_estatisticas_fim` `buscar_eventos_fim` `obter_arquivo_monitorado` | Monitoramento e auditoria de alterações em arquivos e registros |
+| **Vulnerabilidades (CVEs)** | `obter_vulnerabilidades_wazuh` `obter_vulnerabilidades_criticas_wazuh` `obter_resumo_vulnerabilidades_wazuh` `buscar_vulnerabilidades_cve` `buscar_vulnerabilidades_pacote` `buscar_vulnerabilidades_severidade` `obter_dashboard_vulnerabilidades` | Análise profunda de vulnerabilidades, pacotes e CVEs |
+| **Regras XML Customizadas** | `obter_resumo_regras_wazuh` `obter_detalhes_regra_wazuh` `testar_mensagem_log_wazuh` `criar_regra_customizada_wazuh` `modificar_regra_customizada_wazuh` `excluir_regra_customizada_wazuh` | Teste em simulador (`wazuh-logtest`), criação, edição e exclusão de regras XML |
+| **Decodificadores XML** | `obter_resumo_decodificadores_wazuh` `criar_decodificador_customizado_wazuh` `modificar_decodificador_customizado_wazuh` `excluir_decodificador_customizado_wazuh` | Gestão completa de decodificadores XML customizados (`/etc/decoders/`) |
+| **Conformidade & SCA** | `obter_resultados_conformidade` `obter_politicas_conformidade` `obter_falhas_conformidade` `executar_teste_conformidade` | Testes de configuração e aderência a políticas de segurança (SCA) |
+| **Inteligência MITRE ATT&CK** | `obter_tecnicas_mitre` `buscar_alertas_por_mitre` `estatisticas_mitre` | Mapeamento de táticas, técnicas e estatísticas do MITRE |
+| **Análise e Relatórios Regulatórios** | `analisar_ameaca_seguranca` `verificar_reputacao_ioc` `executar_avaliacao_risco` `obter_principais_ameacas_seguranca` `gerar_relatorio_seguranca` `gerar_relatorio_nist` `gerar_relatorio_cis` `gerar_relatorio_lgpd` | Relatórios de auditoria para **LGPD**, **NIST SP 800-53**, **CIS Benchmark** e relatórios de segurança |
+| **Resposta Ativa e Contenção** | `resposta_ativa_wazuh` `bloquear_ip_wazuh` `isolar_host_wazuh` `encerrar_processo_wazuh` `desabilitar_usuario_wazuh` `quarentena_arquivo_wazuh` `bloquear_firewall_wazuh` `negar_host_wazuh` `reiniciar_servico_wazuh` | Ações defensivas executadas no ambiente |
+| **Verificação e Desfazer (Rollback)** | `verificar_ip_bloqueado_wazuh` `verificar_isolamento_agente_wazuh` `verificar_processo_wazuh` `verificar_status_usuario_wazuh` `verificar_quarentena_arquivo_wazuh` `desisolar_host_wazuh` `habilitar_usuario_wazuh` `restaurar_arquivo_wazuh` `permitir_firewall_wazuh` `permitir_host_wazuh` | Verificação e reversão de contenções |
 
 ---
 
-## Quick Start
+## 🛠️ Guia de Início Rápido
 
-### Prerequisites
-- Python 3.11+
-- Wazuh Manager (v4.8.0+) with API credentials enabled
-- Docker & Docker Compose (optional, for containerized run)
+### Pré-requisitos
+- **Python 3.11+**
+- **Wazuh Manager (v4.8.0+)** com credenciais da API habilitadas
+- **Wazuh Indexer (OpenSearch)** na porta 9200 (para busca de alertas e vulnerabilidades)
 
-### Installation
+### Instalação e Configuração
 
-1. **Clone repository and configure environment**:
+1. **Clonar o repositório**:
    ```bash
    git clone https://github.com/nks1097/Wazuh_Servidor_MCP.git
    cd Wazuh_Servidor_MCP
-   cp .env.example .env
    ```
 
-2. **Configure `.env`**:
+2. **Configurar as variáveis no arquivo `.env`**:
    ```env
-   WAZUH_HOST=https://your-wazuh-manager
-   WAZUH_USER=wazuh-api-user
-   WAZUH_PASS=wazuh-api-password
+   # Credenciais da API do Wazuh Manager (Porta 55000)
+   WAZUH_HOST=192.168.0.106
    WAZUH_PORT=55000
+   WAZUH_USER=wazuh
+   WAZUH_PASS=SuaSenhaWazuh
+
+   # Credenciais do Wazuh Indexer (OpenSearch - Porta 9200)
+   WAZUH_INDEXER_HOST=192.168.0.106
+   WAZUH_INDEXER_PORT=9200
+   WAZUH_INDEXER_USER=admin
+   WAZUH_INDEXER_PASS=SuaSenhaIndexer
+   WAZUH_INDEXER_VERIFY_SSL=false
+
+   # Configuração do Servidor MCP
    MCP_HOST=127.0.0.1
    MCP_PORT=3000
-   AUTH_MODE=bearer
-   MCP_API_KEY=your-secure-api-key
+   AUTH_MODE=none
+   AUTHLESS_ALLOW_WRITE=true
    ```
 
-3. **Run with Python**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Or `venv\Scripts\activate` on Windows
-   pip install -r requirements.txt
-   python -m wazuh_mcp_server
-   ```
+3. **Como integrar na sua IDE ou Cliente MCP (Antigravity, LM Studio, Claude Desktop, VS Code)**:
 
-   *Or run via Docker*:
-   ```bash
-   docker compose up -d
-   ```
+   Adicione ao seu arquivo `mcp_config.json`:
 
-4. **Verify Health**:
-   ```bash
-   curl http://localhost:3000/health
+   ```json
+   {
+     "mcpServers": {
+       "wazuh": {
+         "command": "C:\\Python314\\python.exe",
+         "args": [
+           "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
+         ]
+       }
+     }
+   }
    ```
 
 ---
 
-## Connecting to MCP Clients
+## 📜 Licença
 
-### Claude Desktop
-Add to your `claude_desktop_config.json`:
-```json
-{
-  "mcpServers": {
-    "wazuh": {
-      "command": "python",
-      "args": ["-m", "wazuh_mcp_server"],
-      "env": {
-        "WAZUH_HOST": "https://your-wazuh-manager",
-        "WAZUH_USER": "wazuh-api-user",
-        "WAZUH_PASS": "wazuh-api-password"
-      }
-    }
-  }
-}
-```
-
-### Open WebUI / Remote SSE Endpoint
-Endpoint: `http://localhost:3000/mcp` (Streamable HTTP) or `http://localhost:3000/sse`
-
----
-
-## Key Configuration Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `WAZUH_HOST` | Required | Hostname or IP of Wazuh Manager |
-| `WAZUH_USER` | Required | API Username |
-| `WAZUH_PASS` | Required | API Password |
-| `WAZUH_PORT` | `55000` | Wazuh API Port |
-| `MCP_HOST` | `127.0.0.1` | MCP Server Bind Host |
-| `MCP_PORT` | `3000` | MCP Server Bind Port |
-| `AUTH_MODE` | `bearer` | Authentication mode (`bearer`, `oauth`, `none`) |
-| `WAZUH_VERIFY_SSL` | `true` | Verify SSL certificates (`true`/`false`) |
-
----
-
-## API Endpoints
-
-- `/mcp` - MCP Streamable HTTP endpoint
-- `/sse` - Legacy Server-Sent Events endpoint
-- `/health` - Service health status
-- `/metrics` - Prometheus metrics
-- `/docs` - OpenAPI documentation
-
----
-
-## License
-
-[MIT License](LICENSE)
+Distribuído sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
