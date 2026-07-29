@@ -200,6 +200,10 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
    ![Configuração config.toml no ChatGPT Codex](docs/images/config_codex_toml.png)
 
 ---
+### VIDEO DE CONFIGURAÇÃO DE FORMA SIMPLIFICADA USANDO GRATUITAMENTE LLM LOCAL COM LM STUDIO
+
+ ![video](docs/video/wazuh.mp4)
+
 
 ## 📜 Licença
 
