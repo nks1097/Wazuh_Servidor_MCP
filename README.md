@@ -110,8 +110,13 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
    AUTH_MODE=none
    AUTHLESS_ALLOW_WRITE=true
    ```
+   **imagens crie o arquivo .env**
+     ![.env](docs/images/1.png)
 
-3. **Como integrar no Antigravity IDE, LM Studio e ChatGPT Codex**:
+   **Exemplo das configuraçoes do arquivo .env**
+     ![.env](docs/images/2.png)
+   
+4. **Como integrar no Antigravity IDE, LM Studio e ChatGPT Codex**:
 
    > 💡 **1. Como encontrar o caminho exato do seu `python` (Windows / Linux / macOS)**:
    > No campo `"command"` da configuração abaixo, você deve informar o caminho absoluto do executável do Python. Para descobrir o caminho correto:
@@ -157,6 +162,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      }
    }
    ```
+   **imagem de Exemplo de configuração mcp_config.json para o Antigravity IDE**
 
    ![Configuração mcp_config.json na Antigravity IDE](docs/images/config_antigravity_json.png)
 
@@ -173,7 +179,8 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      }
    }
    ```
-
+    **imagem de Exemplo de configuração mcp_config.json para o LM Studio**
+   
    ![Configuração mcpServers no LM Studio](docs/images/config_lmstudio_json.png)
 
    #### 🔹 Para ChatGPT Codex (`C:\Users\<SeuUsuario>\.codex\config.toml` ou `~/.codex/config.toml`):
@@ -184,7 +191,8 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py",
    ]
    ```
-
+    **imagem de Exemplo de configuração mcp_config.json para o codex**
+   
    ![Configuração config.toml no ChatGPT Codex](docs/images/config_codex_toml.png)
 
 ---
