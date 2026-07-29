@@ -110,23 +110,29 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
 
 3. **Como integrar no Antigravity IDE e no LM Studio**:
 
-   > 💡 **Como encontrar o caminho exato do seu `python.exe` no Windows / Linux / macOS**:
-   > No campo `"command"` da configuração JSON abaixo, você deve colocar o caminho absoluto onde o executável do Python está instalado na sua máquina. Para encontrar o caminho correto, use uma das opções no terminal:
+   > 💡 **1. Como encontrar o caminho exato do seu `python` (Windows / Linux / macOS)**:
+   > No campo `"command"` da configuração JSON abaixo, você deve informar o caminho absoluto do executável do Python. Para descobrir o caminho correto:
    > 
-   > - **Opção 1: Usando o próprio Python (Recomendado - Mostra o Python ativo/venv)**:
+   > - **No Linux / macOS**:
    >   ```bash
-   >   python -c "import sys; print(sys.executable)"
+   >   which python3
+   >   # ou usando o próprio Python:
+   >   python3 -c "import sys; print(sys.executable)"
    >   ```
-   > - **Opção 2: Usando o CMD (Prompt de Comando)**:
+   > - **No Windows (CMD / PowerShell)**:
    >   ```cmd
    >   where python
    >   ```
-   > - **Opção 3: Usando o PowerShell**:
+   >   No PowerShell:
    >   ```powershell
    >   (Get-Command python).Source
-   >   # ou:
-   >   where.exe python
    >   ```
+   >
+   > 📁 **2. Onde fica o arquivo `wazuh-mcp-bridge.py`?**:
+   > O script de ponte `wazuh-mcp-bridge.py` fica localizado na **raiz da pasta do projeto clonado** (`Wazuh_Servidor_MCP/wazuh-mcp-bridge.py`).
+   > Para obter o caminho absoluto exato para colocar no campo `"args"`:
+   > - **No Linux / macOS**: Navegue até a pasta do projeto e rode `pwd`. O caminho final será: `/caminho/obtido/Wazuh_Servidor_MCP/wazuh-mcp-bridge.py`.
+   > - **No Windows**: Abra o PowerShell na pasta do projeto e rode `(Get-Item wazuh-mcp-bridge.py).FullName`. Exemplo: `C:\Users\SeuUsuario\Wazuh_Servidor_MCP\wazuh-mcp-bridge.py`.
 
    #### 🔹 Para Antigravity IDE (`C:\Users\<SeuUsuario>\.gemini\config\mcp_config.json`):
    ```json
