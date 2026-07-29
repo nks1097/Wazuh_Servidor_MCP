@@ -110,12 +110,30 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
 
 3. **Como integrar no Antigravity IDE e no LM Studio**:
 
+   > 💡 **Como encontrar o caminho exato do seu `python.exe` no Windows / Linux / macOS**:
+   > No campo `"command"` da configuração JSON abaixo, você deve colocar o caminho absoluto onde o executável do Python está instalado na sua máquina. Para encontrar o caminho correto, use uma das opções no terminal:
+   > 
+   > - **Opção 1: Usando o próprio Python (Recomendado - Mostra o Python ativo/venv)**:
+   >   ```bash
+   >   python -c "import sys; print(sys.executable)"
+   >   ```
+   > - **Opção 2: Usando o CMD (Prompt de Comando)**:
+   >   ```cmd
+   >   where python
+   >   ```
+   > - **Opção 3: Usando o PowerShell**:
+   >   ```powershell
+   >   (Get-Command python).Source
+   >   # ou:
+   >   where.exe python
+   >   ```
+
    #### 🔹 Para Antigravity IDE (`C:\Users\<SeuUsuario>\.gemini\config\mcp_config.json`):
    ```json
    {
      "mcpServers": {
        "wazuh": {
-         "command": "C:\\Python314\\python.exe",
+         "command": "C:\\Caminho\\Para\\Seu\\python.exe",
          "args": [
            "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
          ],
@@ -134,7 +152,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
    {
      "mcpServers": {
        "wazuh": {
-         "command": "C:\\Python314\\python.exe",
+         "command": "C:\\Caminho\\Para\\Seu\\python.exe",
          "args": [
            "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
          ]
