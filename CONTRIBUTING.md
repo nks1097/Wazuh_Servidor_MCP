@@ -1,308 +1,132 @@
-# Contributing to Wazuh MCP Server
+# 🤝 Como Contribuir para o Wazuh Servidor MCP
 
-Welcome to the Wazuh MCP Server project! This guide will help you understand the repository structure, contribution workflow, and release process.
-
-## 📋 Table of Contents
-
-1. [Repository Overview](#repository-overview)
-2. [Branch Strategy](#branch-strategy)
-3. [Development Setup](#development-setup)
-4. [Repository Structure](#repository-structure)
-5. [Development Workflow](#development-workflow)
-6. [Testing Guidelines](#testing-guidelines)
-7. [Release Logic](#release-logic)
-8. [Code Standards](#code-standards)
-9. [Documentation](#documentation)
-10. [Getting Help](#getting-help)
-
-## 🏗️ Repository Overview
-
-This repository contains a production-ready MCP-compliant remote server implementation:
-
-- **`main` branch**: MCP-compliant remote server with SSE transport (v4.x.x)
-
-The implementation provides enterprise-grade integration between Claude Desktop and Wazuh SIEM platform using HTTP/SSE transport.
-
-## 🌳 Branch Strategy
-
-### Main Branch
-- **`main`**: Production-ready MCP remote server implementation
-
-### Development Flow
-- Feature branches: `feature/feature-name`
-- Bugfix branches: `fix/issue-description`
-- Hotfix branches: `hotfix/urgent-fix`
-
-### Branch Protection Rules
-- All changes must go through Pull Requests
-- CI/CD must pass before merging
-- Code review required from maintainers
-- Branch protection enforced on main branch
-
-## 🛠️ Development Setup
-
-### Prerequisites
-- **Python 3.13+** recommended
-- **Git** with GitHub access
-- **Docker 20.10+** with Compose v2.20+
-- **Node.js** (for pre-commit hooks)
-
-### Quick Setup
-```bash
-# 1. Fork and clone the repository
-git clone https://github.com/your-username/Wazuh-MCP-Server.git
-cd Wazuh-MCP-Server
-
-# 2. Set up the development environment (for native development)
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# 3. Install development dependencies
-pip install -r requirements.txt
-
-# 4. For Docker development (recommended)
-docker compose -f compose.dev.yml up -d --build
-```
-
-### Environment Configuration
-```bash
-# Copy environment template
-cp .env.example .env
-
-# Edit with your Wazuh server details
-# See INSTALLATION.md for detailed configuration options
-```
-
-## 📂 Repository Structure
-
-```
-Wazuh-MCP-Server/
-├── .github/                    # GitHub Actions workflows
-│   └── workflows/
-│       ├── ci.yml             # Continuous Integration
-│       ├── release.yml        # Release automation
-│       ├── security.yml       # Security scanning
-│       └── branch-sync.yml    # Branch synchronization
-├── src/wazuh_mcp_server/      # Main source code
-│   ├── __init__.py
-│   ├── __main__.py            # Entry point
-│   ├── main.py                # FastMCP server (main branch)
-│   ├── server.py              # MCP remote server with SSE
-│   ├── config.py              # Configuration management
-│   ├── api/                   # Wazuh API clients
-│   ├── tools/                 # MCP tool implementations
-│   ├── scripts/               # Utility scripts
-│   └── utils/                 # Shared utilities
-├── tests/                     # Test suite
-├── tools/                     # Development tools
-│   ├── branch-sync.py         # Branch synchronization
-│   └── version-manager.py     # Version management
-├── Dockerfile                # Docker container configuration
-├── compose.yml              # Docker Compose setup
-├── compose.dev.yml          # Development Docker Compose
-├── deploy-production.sh     # Production deployment script
-├── install.sh               # Installation script
-├── pyproject.toml          # Python project configuration
-├── README.md               # Main documentation
-├── CONTRIBUTING.md         # This file
-├── INSTALLATION.md         # Installation guide
-└── .env.example           # Environment template
-```
-
-### Key Files
-
-**Core Application**:
-- `src/wazuh_mcp_server/server.py` - MCP remote server implementation with SSE
-- `src/wazuh_mcp_server/__main__.py` - Application entry point
-- `src/wazuh_mcp_server/config.py` - Configuration management
-
-**Deployment**:
-- `Dockerfile` - Production container configuration
-- `compose.yml` - Docker Compose production setup
-- `deploy-production.sh` - Automated deployment script
-
-**Documentation**:
-- `README.md` - Main project documentation
-- `INSTALLATION.md` - Detailed installation guide
-- `MCP_COMPLIANCE_VERIFICATION.md` - MCP compliance details
-
-## 🔄 Development Workflow
-
-### 1. Create Feature Branch
-```bash
-# From main branch
-git checkout main
-git pull origin main
-git checkout -b feature/your-feature-name
-
-# Make your changes
-# ...
-
-# Commit with conventional commits
-git commit -m "feat: add new security tool for vulnerability scanning"
-```
-
-### 3. Testing Your Changes
-```bash
-# Run tests
-pytest tests/ -v
-
-# Run linting
-ruff check src/
-black src/
-mypy src/
-
-# Test the MCP remote server
-docker compose up -d --build
-curl http://localhost:3000/health
-
-# Test SSE endpoint
-curl -H "Authorization: Bearer YOUR_TOKEN" \
-     -H "Accept: text/event-stream" \
-     http://localhost:3000/sse
-```
-
-### 4. Submit Pull Request
-- Push your branch to your fork
-- Create PR against the appropriate target branch
-- Fill out the PR template completely
-- Ensure all CI checks pass
-
-## 🧪 Testing Guidelines
-
-### Test Structure
-```
-tests/
-├── unit/                  # Unit tests
-├── integration/           # Integration tests
-├── fixtures/             # Test data
-└── conftest.py           # Pytest configuration
-```
-
-### Running Tests
-```bash
-# All tests
-pytest tests/ -v
-
-# Unit tests only
-pytest tests/unit/ -v
-
-# With coverage
-pytest tests/ --cov=src/wazuh_mcp_server --cov-report=html
-
-# Specific test file
-pytest tests/unit/test_wazuh_client.py -v
-```
-
-### Test Requirements
-- All new features must include tests
-- Maintain >90% code coverage
-- Include both positive and negative test cases
-- Mock external dependencies (Wazuh API calls)
-
-## 🚀 Release Logic
-
-### Version Strategy
-- **Main Branch**: Semantic versioning `4.x.x`
-  - `4.0.0` - Current stable MCP remote server version
-  - `4.x.x` - Future releases with SSE transport
-
-### Release Process
-1. **Automated Releases**: Triggered by version tags
-   ```bash
-   # Create and push version tag
-   git tag v4.0.1
-   git push origin v4.0.1
-
-   # GitHub Actions will automatically:
-   # - Build Docker image
-   # - Run tests
-   # - Create GitHub release
-   ```
-
-2. **Manual Releases**: Via GitHub Actions workflow dispatch
-   - Navigate to Actions → Release Pipeline
-   - Trigger manual release
-
-### Release Artifacts
-- Docker image (via GitHub Container Registry)
-- GitHub release with deployment scripts
-- Documentation and compliance verification
-
-## 📝 Code Standards
-
-### Python Code Style
-- **Black**: Code formatting (line length: 88)
-- **Ruff**: Linting and import sorting
-- **mypy**: Type checking
-- **Docstrings**: Google style for all public functions
-
-### Git Commit Messages
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
-```bash
-feat: add new vulnerability scanning tool
-fix: resolve connection timeout in Wazuh client
-docs: update installation instructions
-test: add unit tests for alert filtering
-chore: update dependencies
-```
-
-### Code Review Checklist
-- [ ] Code follows style guidelines
-- [ ] Tests are included and passing
-- [ ] Documentation is updated
-- [ ] No hardcoded secrets or credentials
-- [ ] Error handling is appropriate
-- [ ] Performance impact considered
-
-## 📚 Documentation
-
-### Documentation Types
-1. **Code Documentation**: Inline docstrings and comments
-2. **API Documentation**: Auto-generated from docstrings
-3. **User Documentation**: Installation and usage guides
-4. **Developer Documentation**: Architecture and contribution guides
-
-### Documentation Standards
-- Keep README.md branch-specific
-- Update CHANGELOG.md for releases
-- Include code examples in docstrings
-- Document configuration options
-- Provide troubleshooting sections
-
-## 🆘 Getting Help
-
-### Communication Channels
-- **GitHub Issues**: Bug reports and feature requests
-- **GitHub Discussions**: Questions and community support
-- **Pull Request Reviews**: Code-specific discussions
-
-### Issue Templates
-When creating issues, use the appropriate template:
-- **Bug Report**: For reporting bugs
-- **Feature Request**: For suggesting enhancements
-- **Security Issue**: For security-related concerns
-
-### Development Questions
-Before asking for help:
-1. Check existing issues and discussions
-2. Review this contributing guide
-3. Check the USER_GUIDE.md for setup issues
-4. Review the code and tests for similar patterns
-
-## 🏆 Recognition
-
-Contributors are recognized in:
-- CHANGELOG.md for releases
-- GitHub contributors page
-- Special recognition for significant contributions
-
-## 📄 License
-
-By contributing to this project, you agree that your contributions will be licensed under the MIT License.
+Seja bem-vindo ao projeto **Wazuh Servidor MCP**! Este guia explica a estrutura do repositório, o fluxo de desenvolvimento, os padrões de código e como você pode contribuir.
 
 ---
 
-**Thank you for contributing to the Wazuh MCP Server project!**
+## 📋 Sumário
 
-For questions about this guide, please open an issue or start a discussion.
+1. [Visão Geral do Repositório](#-visão-geral-do-repositório)
+2. [Estratégia de Branches](#-estratégia-de-branches)
+3. [Configuração do Ambiente de Desenvolvimento](#-configuração-do-ambiente-de-desenvolvimento)
+4. [Estrutura do Projeto](#-estrutura-do-projeto)
+5. [Fluxo de Desenvolvimento](#-fluxo-de-desenvolvimento)
+6. [Diretrizes de Testes](#-diretrizes-de-testes)
+7. [Padrões de Código](#-padrões-de-código)
+8. [Como Solicitar Recursos ou Reportar Bugs](#-como-solicitar-recursos-ou-reportar-bugs)
+
+---
+
+## 🏗️ Visão Geral do Repositório
+
+Este repositório fornece uma implementação de produção do protocolo **MCP (Model Context Protocol)** para integração direta com a plataforma **Wazuh SIEM**:
+
+- **78 Ferramentas MCP em Português** para consulta de alertas, agentes, FIM, vulnerabilidades (CVEs), regras XML, decodificadores, conformidade (SCA), inteligência MITRE ATT&CK, SOAR e relatórios regulatórios (LGPD, NIST SP 800-53, CIS Benchmark).
+- Suporte nativo para **HTTP (FastAPI / SSE)** e **Stdio Proxy (`wazuh-mcp-bridge.py`)** para integração transparente com a Antigravity IDE, LM Studio, Claude Desktop e VS Code.
+
+---
+
+## 🌳 Estratégia de Branches
+
+### Branch Principal
+- **`main`**: Código estável e pronto para produção.
+
+### Fluxo de Branches
+- Novas funcionalidades: `feature/nome-da-feature`
+- Correções de bugs: `fix/descricao-do-bug`
+- Correções urgentes: `hotfix/correcao-urgente`
+
+---
+
+## 🛠️ Configuração do Ambiente de Desenvolvimento
+
+### Pré-requisitos
+- **Python 3.11+**
+- **Git**
+- **Wazuh Manager (v4.8.0+)** com API habilitada
+- **Wazuh Indexer (OpenSearch)** na porta 9200
+
+### Configuração Inicial
+
+1. **Clonar o repositório**:
+   ```bash
+   git clone https://github.com/nks1097/Wazuh_Servidor_MCP.git
+   cd Wazuh_Servidor_MCP
+   ```
+
+2. **Criar e ativar o ambiente virtual (venv)**:
+   ```bash
+   python -m venv venv
+   # No Windows (PowerShell):
+   .\venv\Scripts\Activate.ps1
+   # No Linux/macOS:
+   source venv/bin/activate
+   ```
+
+3. **Instalar dependências de desenvolvimento**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Configurar o arquivo `.env`**:
+   Copie o modelo de ambiente e ajuste com os dados do seu ambiente Wazuh:
+   ```bash
+   cp .env.example .env
+   ```
+
+---
+
+## 📂 Estrutura do Projeto
+
+```
+Wazuh_Servidor_MCP/
+├── src/wazuh_mcp_server/      # Código-fonte principal
+│   ├── api/                   # Clientes de API (Wazuh Manager REST + OpenSearch Indexer)
+│   ├── tools/                 # Implementação das 78 ferramentas MCP
+│   ├── config.py              # Gerenciador de configurações e variáveis de ambiente
+│   ├── server.py              # Servidor FastMCP e rotas HTTP/SSE
+│   └── main.py                # Ponto de entrada da aplicação
+├── wazuh-mcp-bridge.py        # Ponte stdio <-> HTTP para clientes MCP
+├── Start-WazuhMCP.ps1         # Script PowerShell de inicialização rápida
+├── start-wazuh-mcp.bat        # Script BAT de inicialização rápida
+├── README.md                  # Documentação principal em Português
+├── pyproject.toml             # Configurações do pacote Python
+├── Dockerfile                 # Configuração de container Docker
+└── compose.yml                # Configuração do Docker Compose
+```
+
+---
+
+## 🔄 Fluxo de Desenvolvimento
+
+1. Crie uma branch para a sua alteração:
+   ```bash
+   git checkout -b feature/minha-nova-funcionalidade
+   ```
+2. Realize as edições necessárias mantendo os comentários e nomes de funções padronizados.
+3. Teste a execução do servidor localmente:
+   ```bash
+   python -m wazuh_mcp_server
+   ```
+4. Verifique a integração com a ponte stdio:
+   ```bash
+   python wazuh-mcp-bridge.py
+   ```
+5. Faça o commit das suas alterações com mensagens claras (ex: `feat: adicionar suporte a nova API do Wazuh`).
+
+---
+
+## 📐 Padrões de Código
+
+- **Linguagem dos Nomes das Ferramentas MCP**: Todas as 78 ferramentas expostas ao protocolo MCP devem ser mantidas em Português no formato `snake_case` (ex: `obter_alertas_wazuh`, `investigar_incidente_wazuh`).
+- **PEP 8**: Siga as diretrizes padrão de estilo do Python.
+- **Tratamento de Erros**: Utilize exceções personalizadas definidas no projeto (`WazuhAPIError`, `IndexerNotConfiguredError`).
+- **Segurança**: Nunca inclua senhas, tokens ou IPs internos fixos nos arquivos commitados.
+
+---
+
+## 💡 Como Solicitar Recursos ou Reportar Bugs
+
+Caso encontre um bug ou queira sugerir uma nova ferramenta de segurança:
+1. Abra uma **Issue** no repositório do GitHub: [https://github.com/nks1097/Wazuh_Servidor_MCP/issues](https://github.com/nks1097/Wazuh_Servidor_MCP/issues).
+2. Descreva detalhadamente o comportamento esperado e o comportamento observado.
