@@ -75,10 +75,9 @@
    AUTHLESS_ALLOW_WRITE=true
    ```
 
-3. **Como integrar na Antigravity IDE e Clientes MCP (LM Studio, Claude Desktop, VS Code)**:
+3. **Como integrar no Antigravity IDE e no LM Studio**:
 
-   No seu arquivo de configuração `mcp_config.json` (localizado em `C:\Users\<Usuario>\.gemini\config\mcp_config.json`), adicione a seguinte estrutura:
-
+   #### 🔹 Para Antigravity IDE (`C:\Users\<Usuario>\.gemini\config\mcp_config.json`):
    ```json
    {
      "mcpServers": {
@@ -92,6 +91,20 @@
            "FASTMCP_SHOW_SERVER_BANNER": "false",
            "PYTHONIOENCODING": "utf-8"
          }
+       }
+     }
+   }
+   ```
+
+   #### 🔹 Para LM Studio:
+   ```json
+   {
+     "mcpServers": {
+       "wazuh": {
+         "command": "C:\\Python314\\python.exe",
+         "args": [
+           "C:\\Users\\Natanael Krindges\\Music\\integração wazuh\\teste\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
+         ]
        }
      }
    }
