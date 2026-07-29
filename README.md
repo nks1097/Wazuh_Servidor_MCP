@@ -56,13 +56,13 @@
 2. **Configurar as variáveis no arquivo `.env`**:
    ```env
    # Credenciais da API do Wazuh Manager (Porta 55000)
-   WAZUH_HOST=192.168.0.106
+   WAZUH_HOST=https://seu-wazuh-manager.local
    WAZUH_PORT=55000
    WAZUH_USER=wazuh
    WAZUH_PASS=SuaSenhaWazuh
 
    # Credenciais do Wazuh Indexer (OpenSearch - Porta 9200)
-   WAZUH_INDEXER_HOST=192.168.0.106
+   WAZUH_INDEXER_HOST=https://seu-wazuh-indexer.local
    WAZUH_INDEXER_PORT=9200
    WAZUH_INDEXER_USER=admin
    WAZUH_INDEXER_PASS=SuaSenhaIndexer
