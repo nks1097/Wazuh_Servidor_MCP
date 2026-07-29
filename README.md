@@ -42,8 +42,41 @@
 
 ### Pré-requisitos
 - **Python 3.11+**
-- **Wazuh Manager (v4.8.0+)** com credenciais da API habilitadas
-- **Wazuh Indexer (OpenSearch)** na porta 9200 (para busca de alertas e vulnerabilidades)
+- **Wazuh Manager (v4.8.0+)** com credenciais da API habilitadas (porta `55000`)
+- **Wazuh Indexer (OpenSearch)** na porta `9200` (necessário no Wazuh 4.8+ para busca de alertas e vulnerabilidades)
+
+### ⚙️ Configuração Recomendada no Servidor Wazuh (Linux)
+
+Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua rede local (ou máquina de desenvolvimento):
+
+1. **Liberar as Portas no Firewall do Linux**:
+   - **UFW (Ubuntu / Debian)**:
+     ```bash
+     sudo ufw allow 55000/tcp comment 'Wazuh Manager API'
+     sudo ufw allow 9200/tcp comment 'Wazuh Indexer OpenSearch'
+     sudo ufw reload
+     ```
+   - **Firewalld (RHEL / AlmaLinux / Rocky)**:
+     ```bash
+     sudo firewall-cmd --add-port=55000/tcp --permanent
+     sudo firewall-cmd --add-port=9200/tcp --permanent
+     sudo firewall-cmd --reload
+     ```
+
+2. **Permitir Conexões Externas no Wazuh Indexer (`/etc/wazuh-indexer/opensearch.yml`)**:
+   Por padrão, o OpenSearch pode vir escutando apenas em `127.0.0.1`. Para permitir que o MCP Server consulte o Indexer na porta 9200:
+   - Abra o arquivo de configuração do Indexer:
+     ```bash
+     sudo nano /etc/wazuh-indexer/opensearch.yml
+     ```
+   - Verifique ou altere a diretiva `network.host` para aceitar conexões da rede:
+     ```yaml
+     network.host: 0.0.0.0
+     ```
+   - Reinicie o serviço do Wazuh Indexer para aplicar as alterações:
+     ```bash
+     sudo systemctl restart wazuh-indexer
+     ```
 
 ### Instalação e Configuração
 
