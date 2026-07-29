@@ -113,9 +113,11 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
    **imagens crie o arquivo .env**
      ![.env](docs/images/1.png)
 
+
    **Exemplo das configuraçoes do arquivo .env**
      ![.env](docs/images/2.png)
-   
+
+    ---
 4. **Como integrar no Antigravity IDE, LM Studio e ChatGPT Codex**:
 
    > 💡 **1. Como encontrar o caminho exato do seu `python` (Windows / Linux / macOS)**:
