@@ -110,7 +110,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
    AUTH_MODE=none
    AUTHLESS_ALLOW_WRITE=true
    ```
-   * imagens crie o arquivo .env
+   * crie o arquivo .env
      
      ![.env](docs/images/1.png)
 
