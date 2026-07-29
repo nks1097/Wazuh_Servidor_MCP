@@ -80,7 +80,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      ```bash
      sudo systemctl restart wazuh-indexer
      ```
-
+  ---
 ### Instalação e Configuração
 
 1. **Clonar o repositório**:
