@@ -77,14 +77,14 @@
 
 3. **Como integrar no Antigravity IDE e no LM Studio**:
 
-   #### 🔹 Para Antigravity IDE (`C:\Users\<Usuario>\.gemini\config\mcp_config.json`):
+   #### 🔹 Para Antigravity IDE (`C:\Users\<SeuUsuario>\.gemini\config\mcp_config.json`):
    ```json
    {
      "mcpServers": {
        "wazuh": {
          "command": "C:\\Python314\\python.exe",
          "args": [
-           "C:\\Users\\Natanael Krindges\\.gemini\\antigravity\\scratch\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
+           "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
          ],
          "env": {
            "FASTMCP_LOG_LEVEL": "CRITICAL",
@@ -103,7 +103,7 @@
        "wazuh": {
          "command": "C:\\Python314\\python.exe",
          "args": [
-           "C:\\Users\\Natanael Krindges\\Music\\integração wazuh\\teste\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
+           "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py"
          ]
        }
      }
