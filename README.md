@@ -202,7 +202,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
 ---
 ### VIDEO DE CONFIGURAÇÃO DE FORMA SIMPLIFICADA USANDO GRATUITAMENTE LLM LOCAL COM LM STUDIO
 
- ![video](docs/video/wazuh.mp4)
+ <video src="docs/video/wazuh.mp4" controls style="max-width: 100%;"></video>
 
 
 ## 📜 Licença
