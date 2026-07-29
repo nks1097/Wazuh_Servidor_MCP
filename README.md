@@ -73,8 +73,9 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      ```yaml
      network.host: 0.0.0.0
      ```
-       ![network](imagem/5.png)
-     
+   
+   ![Configuração do Wazuh Indexer opensearch.yml](docs/images/config_wazuh_indexer_opensearch.png)
+      
    - Reinicie o serviço do Wazuh Indexer para aplicar as alterações:
      ```bash
      sudo systemctl restart wazuh-indexer
@@ -109,9 +110,8 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
    AUTH_MODE=none
    AUTHLESS_ALLOW_WRITE=true
    ```
-     ![.env](imagem/5.png)
-   
-4. **Como integrar no Antigravity IDE, LM Studio e ChatGPT Codex**:
+    
+3. **Como integrar no Antigravity IDE, LM Studio e ChatGPT Codex**:
 
    > 💡 **1. Como encontrar o caminho exato do seu `python` (Windows / Linux / macOS)**:
    > No campo `"command"` da configuração abaixo, você deve informar o caminho absoluto do executável do Python. Para descobrir o caminho correto:
@@ -130,7 +130,8 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
    >   ```powershell
    >   (Get-Command python).Source
    >   ```
-   >    ![command](imagem/5.png)
+   >
+   > ![Consulta do Executável do Python no Terminal](docs/images/terminal_cmd_where_python.png)
    >   
    > 📁 **2. Onde fica o arquivo `wazuh-mcp-bridge.py`?**:
    > O script de ponte `wazuh-mcp-bridge.py` fica localizado na **raiz da pasta do projeto clonado** (`Wazuh_Servidor_MCP/wazuh-mcp-bridge.py`).
@@ -156,8 +157,9 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      }
    }
    ```
-      ![Antigravity](imagem/5.png)
-     
+   
+   ![Configuração mcp_config.json na Antigravity IDE](docs/images/config_antigravity_json.png)
+      
    #### 🔹 Para LM Studio:
    ```json
    {
@@ -171,8 +173,9 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      }
    }
    ```
-      ![LM Studio](imagem/5.png)
    
+   ![Configuração mcpServers no LM Studio](docs/images/config_lmstudio_json.png)
+    
    #### 🔹 Para ChatGPT Codex (`C:\Users\<SeuUsuario>\.codex\config.toml` ou `~/.codex/config.toml`):
    ```toml
    [mcp_servers.wazuh]
@@ -181,7 +184,8 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py",
    ]
    ```
-      ![ChatGPT Codex](imagem/5.png)
+
+   ![Configuração config.toml no ChatGPT Codex](docs/images/config_codex_toml.png)
 
 ---
 
