@@ -19,6 +19,28 @@
 
 ---
 
+## 📸 Como Adicionar Imagens e Vídeos no GitHub
+
+Para exibir imagens e vídeos demonstrativos na página do repositório no GitHub:
+
+### 1. Método mais fácil (Arrastar e Soltar na Web)
+1. No GitHub, abra o arquivo `README.md` e clique no ícone de lápis ✏️ (**Edit this file**).
+2. **Arraste e solte** sua imagem (`.png`, `.jpg`, `.gif`) ou vídeo (`.mp4`, `.mov`) diretamente na caixa de edição.
+3. O GitHub fará o upload automaticamente e gerará o link da mídia já formatado!
+
+### 2. Método via Código no Repositório
+Se quiser salvar as mídias dentro do repositório:
+- **Para Imagens e GIFs**:
+  ```markdown
+  ![Demonstração do Wazuh MCP](caminho/para/imagem.png)
+  ```
+- **Para Vídeos (MP4 / WebM)**:
+  ```html
+  <video src="caminho/para/video.mp4" controls width="100%"></video>
+  ```
+
+---
+
 ## 📊 Matriz das 78 Ferramentas de Segurança em Português
 
 | Categoria | Ferramentas | Descrição |
