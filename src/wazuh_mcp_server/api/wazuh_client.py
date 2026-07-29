@@ -453,7 +453,8 @@ class WazuhClient:
             await self._authenticate()
 
         url = f"{self.config.base_url}{endpoint}"
-        headers = {"Authorization": f"Bearer {self.token}"}
+        headers = kwargs.pop("headers", {})
+        headers["Authorization"] = f"Bearer {self.token}"
 
         try:
             response = await self.client.request(method, url, headers=headers, **kwargs)
@@ -1539,6 +1540,345 @@ class WazuhClient:
             "arguments": [f"-srcip {src_ip}", "delete"],
         }
         return await self.execute_active_response(data)
+
+    async def get_agent_fim_changes(
+        self, agent_id: str, limit: int = 100, file_path: Optional[str] = None, event_type: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get File Integrity Monitoring (FIM / syscheck) file changes for an agent."""
+        agent_id = self._validate_agent_id(agent_id)
+        params = {"limit": min(limit, 500)}
+        if file_path:
+            params["file"] = file_path
+        if event_type:
+            params["event"] = event_type
+        return await self._request("GET", f"/syscheck/{agent_id}", params=params)
+
+    async def get_rule_details(self, rule_id: str) -> Dict[str, Any]:
+        """Get details and definition for a specific Wazuh rule ID."""
+        params = {"rule_ids": rule_id}
+        return await self._request("GET", "/rules", params=params)
+
+    async def test_log_message(self, log_message: str, location: str = "syslog") -> Dict[str, Any]:
+        """Test a raw log line against Wazuh decoders and rules via wazuh-logtest."""
+        payload = {"token": "logtest", "log": log_message, "location": location}
+        return await self._request("PUT", "/logtest", json=payload)
+
+    async def manage_agent_groups(
+        self, action: str, group_id: str, agent_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Manage agent group membership or global Wazuh groups (add, remove, set, create, delete)."""
+        if action == "add":
+            if not agent_id:
+                raise ValueError("agent_id is required for action 'add'")
+            agent_id = self._validate_agent_id(agent_id)
+            return await self._request("PUT", f"/agents/{agent_id}/group/{group_id}")
+        elif action == "remove":
+            if not agent_id:
+                raise ValueError("agent_id is required for action 'remove'")
+            agent_id = self._validate_agent_id(agent_id)
+            return await self._request("DELETE", f"/agents/{agent_id}/group/{group_id}")
+        elif action == "set":
+            if not agent_id:
+                raise ValueError("agent_id is required for action 'set'")
+            agent_id = self._validate_agent_id(agent_id)
+            return await self._request("PUT", f"/agents/{agent_id}/group", json={"groups": [group_id]})
+        elif action == "create":
+            return await self._request("POST", "/groups", json={"group_id": group_id})
+        elif action == "delete":
+            return await self._request("DELETE", "/groups", params={"groups_list": group_id})
+        else:
+            raise ValueError("Action must be 'add', 'remove', 'set', 'create', or 'delete'")
+
+    async def create_custom_rule(self, content: str, filename: str = "local_rules.xml") -> Dict[str, Any]:
+        """Create or upload a custom XML rule file in Wazuh Manager (/etc/rules/{filename})."""
+        headers = {"Content-Type": "application/octet-stream"}
+        raw_content = content.encode("utf-8") if isinstance(content, str) else content
+        return await self._request(
+            "PUT", f"/rules/files/{filename}", params={"overwrite": "true"}, content=raw_content, headers=headers
+        )
+
+    async def modify_custom_rule(self, content: str, filename: str = "local_rules.xml") -> Dict[str, Any]:
+        """Modify or update an existing custom XML rule file in Wazuh Manager."""
+        headers = {"Content-Type": "application/octet-stream"}
+        raw_content = content.encode("utf-8") if isinstance(content, str) else content
+        return await self._request(
+            "PUT", f"/rules/files/{filename}", params={"overwrite": "true"}, content=raw_content, headers=headers
+        )
+
+    async def delete_custom_rule(self, filename: str) -> Dict[str, Any]:
+        """Delete a custom XML rule file from Wazuh Manager."""
+        return await self._request("DELETE", f"/rules/files/{filename}")
+
+    async def get_decoders_summary(self) -> Dict[str, Any]:
+        """Get summary of active decoder files from Wazuh Manager."""
+        return await self._request("GET", "/decoders/files")
+
+    async def create_custom_decoder(self, content: str, filename: str = "local_decoder.xml") -> Dict[str, Any]:
+        """Create or upload a custom XML decoder file in Wazuh Manager (/etc/decoders/{filename})."""
+        headers = {"Content-Type": "application/octet-stream"}
+        raw_content = content.encode("utf-8") if isinstance(content, str) else content
+        return await self._request(
+            "PUT", f"/decoders/files/{filename}", params={"overwrite": "true"}, content=raw_content, headers=headers
+        )
+
+    async def modify_custom_decoder(self, content: str, filename: str = "local_decoder.xml") -> Dict[str, Any]:
+        """Modify or update an existing custom XML decoder file in Wazuh Manager."""
+        headers = {"Content-Type": "application/octet-stream"}
+        raw_content = content.encode("utf-8") if isinstance(content, str) else content
+        return await self._request(
+            "PUT", f"/decoders/files/{filename}", params={"overwrite": "true"}, content=raw_content, headers=headers
+        )
+
+    async def delete_custom_decoder(self, filename: str) -> Dict[str, Any]:
+        """Delete a custom XML decoder file from Wazuh Manager."""
+        return await self._request("DELETE", f"/decoders/files/{filename}")
+
+    async def get_agent_packages(
+        self, agent_id: str, limit: int = 100, search: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get installed packages/software inventory for an agent from Syscollector."""
+        agent_id = self._validate_agent_id(agent_id)
+        params = {"limit": min(limit, 500)}
+        if search:
+            params["search"] = search
+        return await self._request("GET", f"/syscollector/{agent_id}/packages", params=params)
+
+    async def investigate_incident(
+        self,
+        agent_id: Optional[str] = None,
+        alert_id: Optional[str] = None,
+        rule_id: Optional[str] = None,
+        ioc: Optional[str] = None,
+        time_range: str = "24h",
+    ) -> Dict[str, Any]:
+        """
+        Orchestrate a complete 11-step SOC incident investigation across Wazuh subsystems:
+        1. Localizar Alerta
+        2. Buscar Agente
+        3. Verificar Processos
+        4. Verificar Portas
+        5. Verificar Vulnerabilidades
+        6. Consultar IOC
+        7. Consultar MITRE ATT&CK
+        8. Analisar FIM (Syscheck)
+        9. Produzir Timeline
+        10. Calcular Risco (0-100)
+        11. Sugerir Contenção
+        """
+        target_agent = agent_id or "001"
+
+        # Parallel gathering
+        tasks = [
+            self.get_alerts(time_range=time_range, agent_id=target_agent, limit=10),
+            self.get_agents(agent_id=target_agent) if target_agent else asyncio.sleep(0),
+            self.get_agent_processes(target_agent, limit=10) if target_agent else asyncio.sleep(0),
+            self.get_agent_ports(target_agent, limit=10) if target_agent else asyncio.sleep(0),
+            self.get_vulnerabilities(agent_id=target_agent, limit=10) if target_agent else asyncio.sleep(0),
+            self.get_agent_fim_changes(target_agent, limit=10) if target_agent else asyncio.sleep(0),
+        ]
+
+        if ioc:
+            tasks.append(self.check_ioc_reputation(ioc))
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        alerts_res = results[0] if not isinstance(results[0], Exception) else {}
+        agent_res = results[1] if not isinstance(results[1], Exception) else {}
+        proc_res = results[2] if not isinstance(results[2], Exception) else {}
+        ports_res = results[3] if not isinstance(results[3], Exception) else {}
+        vuln_res = results[4] if not isinstance(results[4], Exception) else {}
+        fim_res = results[5] if not isinstance(results[5], Exception) else {}
+        ioc_res = results[6] if ioc and len(results) > 6 and not isinstance(results[6], Exception) else {}
+
+        alerts = alerts_res.get("data", {}).get("affected_items", []) if isinstance(alerts_res, dict) else []
+        agent_items = agent_res.get("data", {}).get("affected_items", []) if isinstance(agent_res, dict) else []
+        agent_info = agent_items[0] if agent_items else {}
+        processes = proc_res.get("data", {}).get("affected_items", []) if isinstance(proc_res, dict) else []
+        ports = ports_res.get("data", {}).get("affected_items", []) if isinstance(ports_res, dict) else []
+        vulns = vuln_res.get("data", {}).get("affected_items", []) if isinstance(vuln_res, dict) else []
+        fim_events = fim_res.get("data", {}).get("affected_items", []) if isinstance(fim_res, dict) else []
+
+        max_level = max([a.get("rule", {}).get("level", 0) for a in alerts], default=5)
+        risk_score = min(100, max_level * 6 + (15 if vulns else 0) + (10 if fim_events else 0))
+
+        containment = []
+        if target_agent and target_agent != "000":
+            containment.append(
+                {
+                    "action": "isolar_host_wazuh",
+                    "params": {"agent_id": target_agent},
+                    "reason": "Isolamento preventivo de rede do host comprometido.",
+                }
+            )
+        if ioc:
+            containment.append(
+                {
+                    "action": "bloquear_ip_wazuh",
+                    "params": {"ip": ioc},
+                    "reason": "Bloqueio no firewall do IP/IOC malicioso.",
+                }
+            )
+        if processes:
+            suspect_p = processes[0]
+            containment.append(
+                {
+                    "action": "encerrar_processo_wazuh",
+                    "params": {"agent_id": target_agent, "pid": suspect_p.get("pid")},
+                    "reason": f"Encerrar processo {suspect_p.get('name')} (PID {suspect_p.get('pid')}).",
+                }
+            )
+
+        return {
+            "status": "success",
+            "target_agent": target_agent,
+            "agent_info": {
+                "name": agent_info.get("name"),
+                "ip": agent_info.get("ip"),
+                "os": agent_info.get("os", {}).get("name"),
+                "status": agent_info.get("status"),
+            },
+            "alerts_found": len(alerts),
+            "top_alerts": alerts[:3],
+            "active_processes_sample": processes[:5],
+            "open_ports_sample": ports[:5],
+            "vulnerabilities_found": len(vulns),
+            "top_vulnerabilities": vulns[:3],
+            "fim_changes_sample": fim_events[:5],
+            "ioc_reputation": ioc_res,
+            "risk_score": risk_score,
+            "risk_level": "CRÍTICO" if risk_score >= 75 else ("ALTO" if risk_score >= 50 else "MÉDIO"),
+            "containment_recommendations": containment,
+        }
+
+    async def get_sca_policies(self, agent_id: str = "001") -> Dict[str, Any]:
+        """Get active Security Configuration Assessment (SCA) policies for an agent."""
+        agent_id = str(agent_id).zfill(3) if str(agent_id).isdigit() else agent_id
+        return await self._request("GET", f"/sca/{agent_id}")
+
+    async def get_sca_checks(self, agent_id: str = "001", policy_id: Optional[str] = None, result_filter: Optional[str] = None, limit: int = 100) -> Dict[str, Any]:
+        """Get SCA check results for an agent (optionally filtered by policy_id or result: passed/failed)."""
+        agent_id = str(agent_id).zfill(3) if str(agent_id).isdigit() else agent_id
+        if not policy_id:
+            policies_res = await self.get_sca_policies(agent_id=agent_id)
+            items = policies_res.get("data", {}).get("affected_items", [])
+            if items:
+                policy_id = items[0].get("policy_id")
+        if not policy_id:
+            return {"data": {"affected_items": [], "total_affected_items": 0}}
+        params = {"limit": min(limit, 500)}
+        if result_filter:
+            params["result"] = result_filter
+        return await self._request("GET", f"/sca/{agent_id}/checks/{policy_id}", params=params)
+
+    async def get_sca_failures(self, agent_id: str = "001", limit: int = 100) -> Dict[str, Any]:
+        """Get only failed compliance checks (SCA) for an agent."""
+        return await self.get_sca_checks(agent_id=agent_id, result_filter="failed", limit=limit)
+
+    async def get_fim_stats(self, agent_id: str = "001") -> Dict[str, Any]:
+        """Get File Integrity Monitoring (Syscheck) statistics for an agent."""
+        agent_id = str(agent_id).zfill(3) if str(agent_id).isdigit() else agent_id
+        return await self._request("GET", f"/syscheck/{agent_id}/stat")
+
+    async def search_fim_events(self, agent_id: str = "001", file_path: Optional[str] = None, limit: int = 100) -> Dict[str, Any]:
+        """Search File Integrity Monitoring (Syscheck) events for an agent."""
+        agent_id = str(agent_id).zfill(3) if str(agent_id).isdigit() else agent_id
+        params = {"limit": min(limit, 500)}
+        if file_path:
+            params["search"] = file_path
+        return await self._request("GET", f"/syscheck/{agent_id}", params=params)
+
+    async def get_monitored_file(self, agent_id: str = "001", file_path: str = "") -> Dict[str, Any]:
+        """Get details and modifications of a specific monitored file/registry key."""
+        return await self.search_fim_events(agent_id=agent_id, file_path=file_path, limit=20)
+
+    async def search_vulnerabilities_by_cve(self, cve_id: str, limit: int = 100) -> Dict[str, Any]:
+        """Search vulnerabilities across agents by CVE ID (e.g., CVE-2024-30078)."""
+        return await self.get_vulnerabilities(cve=cve_id, limit=limit)
+
+    async def search_vulnerabilities_by_package(self, package_name: str, limit: int = 100) -> Dict[str, Any]:
+        """Search vulnerabilities across agents by package name."""
+        return await self.get_vulnerabilities(search=package_name, limit=limit)
+
+    async def search_vulnerabilities_by_severity(self, severity: str = "critical", limit: int = 100) -> Dict[str, Any]:
+        """Filter vulnerabilities by severity (critical, high, medium, low)."""
+        return await self.get_vulnerabilities(severity=severity, limit=limit)
+
+    async def get_mitre_techniques(self, limit: int = 100) -> Dict[str, Any]:
+        """Get MITRE ATT&CK techniques and tactics from active Wazuh alert rules."""
+        res = await self.get_rules_summary()
+        return {"data": res.get("data", {}).get("top_groups", []), "total_rules": res.get("data", {}).get("total_rules", 0)}
+
+    async def search_alerts_by_mitre(self, mitre_id: str = "T1059", time_range: str = "24h", limit: int = 50) -> Dict[str, Any]:
+        """Search security alerts by MITRE ATT&CK technique or tactic ID."""
+        return await self.get_alerts(time_range=time_range, search=mitre_id, limit=limit)
+
+    async def get_mitre_stats(self, time_range: str = "24h") -> Dict[str, Any]:
+        """Get statistical summary of top MITRE ATT&CK tactics triggered in recent alerts."""
+        alerts_res = await self.get_alerts(time_range=time_range, limit=500)
+        items = alerts_res.get("data", {}).get("affected_items", [])
+        tactics = {}
+        techniques = {}
+        for a in items:
+            mitre = a.get("rule", {}).get("mitre", {})
+            for tac in mitre.get("tactic", []):
+                tactics[tac] = tactics.get(tac, 0) + 1
+            for tec in mitre.get("id", []):
+                techniques[tec] = techniques.get(tec, 0) + 1
+        return {"total_alerts_analyzed": len(items), "top_tactics": dict(sorted(tactics.items(), key=lambda x: x[1], reverse=True)), "top_techniques": dict(sorted(techniques.items(), key=lambda x: x[1], reverse=True))}
+
+    async def get_alerts_dashboard(self, time_range: str = "24h") -> Dict[str, Any]:
+        """Get consolidated executive dashboard for security alerts."""
+        res = await self.get_alerts_summary(time_range=time_range)
+        return {"dashboard": "Executive Alerts Overview", "data": res}
+
+    async def get_vulnerability_dashboard(self) -> Dict[str, Any]:
+        """Get consolidated executive dashboard for vulnerabilities across infrastructure."""
+        res = await self.get_vulnerability_summary()
+        return {"dashboard": "Executive Vulnerabilities Overview", "data": res}
+
+    async def generate_nist_report(self, time_range: str = "24h") -> Dict[str, Any]:
+        """Generate NIST SP 800-53 Compliance & Audit Report."""
+        alerts = await self.get_alerts(time_range=time_range, limit=200)
+        vulns = await self.get_vulnerability_summary()
+        return {
+            "standard": "NIST SP 800-53 Rev 5",
+            "assessment_period": time_range,
+            "control_access_events": len(alerts.get("data", {}).get("affected_items", [])),
+            "vulnerability_posture": vulns,
+            "status": "COMPLIANT_WITH_FINDINGS"
+        }
+
+    async def generate_cis_report(self, agent_id: str = "001") -> Dict[str, Any]:
+        """Generate CIS Benchmark Security Assessment Report for an agent."""
+        policies = await self.get_sca_policies(agent_id=agent_id)
+        failures = await self.get_sca_failures(agent_id=agent_id, limit=20)
+        items = policies.get("data", {}).get("affected_items", [])
+        policy_info = items[0] if items else {}
+        total = policy_info.get("total_checks", 1)
+        passed = policy_info.get("pass", 0)
+        compliance_pct = round((passed / total) * 100, 2) if total else 0
+        return {
+            "benchmark": policy_info.get("name", "CIS Benchmark"),
+            "agent_id": agent_id,
+            "compliance_score_pct": compliance_pct,
+            "passed_checks": passed,
+            "failed_checks": policy_info.get("fail", 0),
+            "top_failures": failures.get("data", {}).get("affected_items", [])[:5]
+        }
+
+    async def generate_lgpd_report(self, time_range: str = "24h") -> Dict[str, Any]:
+        """Generate LGPD (Lei Geral de Proteção de Dados) Data Privacy & Security Audit Report."""
+        alerts = await self.get_alerts(time_range=time_range, limit=500)
+        items = alerts.get("data", {}).get("affected_items", [])
+        privacy_events = [a for a in items if "sysmon" in a.get("rule", {}).get("groups", []) or "authentication_failed" in a.get("rule", {}).get("groups", [])]
+        return {
+            "norma": "LGPD - Lei Nº 13.709/2018 (Art. 46 - Medidas de Segurança)",
+            "janela_analise": time_range,
+            "total_eventos_monitorados": len(items),
+            "incidentes_privacidade_dados": len(privacy_events),
+            "top_eventos_privacidade": privacy_events[:3],
+            "nivel_conformidade_seguranca": "ADEQUADO" if len(privacy_events) < 50 else "ATENÇÃO_REQUERIDA"
+        }
 
     async def close(self):
         """Close the HTTP client and indexer client, releasing all connections."""

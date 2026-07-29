@@ -116,16 +116,16 @@ HEALTHCHECK --interval=15s --timeout=10s --start-period=45s --retries=5 \
 EXPOSE 3000
 
 # OCI-compliant metadata labels (latest spec)
-LABEL org.opencontainers.image.title="Wazuh MCP Remote Server" \
+LABEL org.opencontainers.image.title="Wazuh Servidor MCP" \
       org.opencontainers.image.description="MCP-compliant remote server for Wazuh SIEM integration with SSE transport (main branch)" \
       org.opencontainers.image.version="${VERSION}" \
       org.opencontainers.image.created="${BUILD_DATE}" \
-      org.opencontainers.image.source="https://github.com/gensecaihq/Wazuh-MCP-Server/tree/main" \
-      org.opencontainers.image.url="https://github.com/gensecaihq/Wazuh-MCP-Server/tree/main" \
-      org.opencontainers.image.documentation="https://github.com/gensecaihq/Wazuh-MCP-Server/blob/main/README.md" \
+      org.opencontainers.image.source="https://github.com/nks1097/Wazuh_Servidor_MCP/tree/main" \
+      org.opencontainers.image.url="https://github.com/nks1097/Wazuh_Servidor_MCP/tree/main" \
+      org.opencontainers.image.documentation="https://github.com/nks1097/Wazuh_Servidor_MCP/blob/main/README.md" \
       org.opencontainers.image.licenses="MIT" \
-      org.opencontainers.image.vendor="GenSec AI" \
-      org.opencontainers.image.authors="GenSec AI <info@gensecai.com>" \
+      org.opencontainers.image.vendor="Nks1097" \
+      org.opencontainers.image.authors="Nks1097 <https://github.com/nks1097>" \
       org.opencontainers.image.ref.name="wazuh-main-server" \
       org.opencontainers.image.base.name="python:3.13-alpine"
 

@@ -872,9 +872,9 @@ async def handle_initialize(params: Dict[str, Any], session: MCPSession) -> Dict
 
     # Server information
     server_info = {
-        "name": "Wazuh MCP Server",
+        "name": "Wazuh Servidor MCP",
         "version": __version__,
-        "vendor": "GenSec AI",
+        "vendor": "Nks1097",
         "description": "MCP-compliant remote server for Wazuh SIEM integration",
     }
 
@@ -1259,20 +1259,27 @@ async def handle_completion_complete(params: Dict[str, Any], session: MCPSession
 # Tool scope mapping: tools requiring write access (active response, rollback, restart)
 # All other tools only require wazuh:read
 WRITE_SCOPE_TOOLS = frozenset({
-    "wazuh_block_ip",
-    "wazuh_isolate_host",
-    "wazuh_kill_process",
-    "wazuh_disable_user",
-    "wazuh_quarantine_file",
-    "wazuh_active_response",
-    "wazuh_firewall_drop",
-    "wazuh_host_deny",
-    "wazuh_restart",
-    "wazuh_unisolate_host",
-    "wazuh_enable_user",
-    "wazuh_restore_file",
-    "wazuh_firewall_allow",
-    "wazuh_host_allow",
+    "resposta_ativa_wazuh",
+    "bloquear_ip_wazuh",
+    "isolar_host_wazuh",
+    "encerrar_processo_wazuh",
+    "desabilitar_usuario_wazuh",
+    "quarentena_arquivo_wazuh",
+    "bloquear_firewall_wazuh",
+    "negar_host_wazuh",
+    "reiniciar_servico_wazuh",
+    "desisolar_host_wazuh",
+    "habilitar_usuario_wazuh",
+    "restaurar_arquivo_wazuh",
+    "permitir_firewall_wazuh",
+    "permitir_host_wazuh",
+    "gerenciar_grupos_agente",
+    "criar_regra_customizada_wazuh",
+    "modificar_regra_customizada_wazuh",
+    "excluir_regra_customizada_wazuh",
+    "criar_decodificador_customizado_wazuh",
+    "modificar_decodificador_customizado_wazuh",
+    "excluir_decodificador_customizado_wazuh",
 })
 
 # Audit logger for destructive operations
@@ -1285,581 +1292,1573 @@ def _get_tool_scope(tool_name: str) -> str:
 
 
 async def handle_tools_list(params: Dict[str, Any], session: MCPSession) -> Dict[str, Any]:
-    """Handle tools/list method - All 48 Wazuh Security Tools with pagination.
-    Filters tools based on session token scopes."""
-    _cursor = params.get("cursor")  # Reserved for future pagination
+    """Handle tools/list method - Todas as 78 Ferramentas MCP de Segurança em Português com paginação."""
+    _cursor = params.get("cursor")
     tools = [
-        # Alert Management Tools (4 tools)
         {
-            "name": "get_wazuh_alerts",
-            "description": "Retrieve Wazuh security alerts with optional filtering",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100},
-                    "rule_id": {"type": "string", "description": "Filter by specific rule ID"},
-                    "level": {"type": "string", "description": "Filter by alert level (e.g., '12', '10+')"},
-                    "agent_id": {"type": "string", "description": "Filter by agent ID"},
-                    "timestamp_start": {"type": "string", "description": "Start timestamp (ISO format)"},
-                    "timestamp_end": {"type": "string", "description": "End timestamp (ISO format)"},
-                    "compact": {
-                        "type": "boolean",
-                        "default": True,
-                        "description": "Return compact alerts with essential fields only (recommended to avoid token limits)",
-                    },
-                },
-                "required": [],
-            },
+                "name": "analisar_ameaca_seguranca",
+                "description": "Analisa uma ameaca de seguranca especifica no ambiente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "threat_id": {
+                                        "description": "ID ou nome da ameaca",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "threat_id"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_wazuh_alert_summary",
-            "description": "Get a summary of Wazuh alerts grouped by specified field",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "time_range": {"type": "string", "enum": ["1h", "6h", "12h", "1d", "24h", "7d", "30d"], "default": "24h"},
-                    "group_by": {"type": "string", "default": "rule.level"},
-                },
-                "required": [],
-            },
+                "name": "analisar_padroes_alertas",
+                "description": "Analisa padroes comportamentais e ocorrencias repetitivas de alertas no Wazuh",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "Filtrar por ID do agente",
+                                        "type": "string"
+                                },
+                                "time_range": {
+                                        "default": "24h",
+                                        "description": "Intervalo de tempo",
+                                        "enum": [
+                                                "1h",
+                                                "6h",
+                                                "12h",
+                                                "1d",
+                                                "24h",
+                                                "7d",
+                                                "30d"
+                                        ],
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
         },
         {
-            "name": "analyze_alert_patterns",
-            "description": "Analyze alert patterns to identify trends and anomalies",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "time_range": {"type": "string", "enum": ["1h", "6h", "12h", "1d", "24h", "7d", "30d"], "default": "24h"},
-                    "min_frequency": {"type": "integer", "minimum": 1, "default": 5},
-                },
-                "required": [],
-            },
+                "name": "bloquear_firewall_wazuh",
+                "description": "[ACAO DE ESCRITA] Aplica uma regra de drop no firewall local do host",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "src_ip": {
+                                        "description": "IP de origem",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "src_ip"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "search_security_events",
-            "description": "Search for specific security events across all Wazuh data. Supports free-text search (Lucene syntax: AND, OR, NOT, field:value, wildcards, quoted phrases) and structured field filters. All filters are combined with AND logic.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Free-text search query (Lucene syntax: AND, OR, NOT, field:value, wildcards, quoted phrases). Searched across all alert fields via Elasticsearch query_string."},
-                    "time_range": {"type": "string", "enum": ["1h", "6h", "12h", "1d", "24h", "7d", "30d"], "default": "24h"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100},
-                    "rule_id": {"type": "string", "description": "Filter by Wazuh rule ID (e.g., '5710', '100002')"},
-                    "agent_id": {"type": "string", "description": "Filter by Wazuh agent ID (e.g., '001', '1234')"},
-                    "level": {"type": "string", "description": "Minimum rule severity level (e.g., '10' for level >= 10, '12+' for level >= 12)"},
-                    "srcip": {"type": "string", "description": "Filter by source IP address (data.srcip)"},
-                    "dstip": {"type": "string", "description": "Filter by destination IP address (data.dstip)"},
-                    "compact": {
-                        "type": "boolean",
-                        "default": True,
-                        "description": "Return compact events with essential fields only (recommended to avoid token limits)",
-                    },
-                },
-                "required": ["query"],
-            },
-        },
-        # Agent Management Tools (6 tools)
-        {
-            "name": "get_wazuh_agents",
-            "description": "Retrieve information about Wazuh agents",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "Specific agent ID to query"},
-                    "status": {
-                        "type": "string",
-                        "enum": ["active", "disconnected", "never_connected", "pending"],
-                        "description": "Filter by agent status",
-                    },
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100},
-                },
-                "required": [],
-            },
+                "name": "bloquear_ip_wazuh",
+                "description": "[ACAO DE ESCRITA] Bloqueia um IP de origem malicioso no firewall do agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "src_ip": {
+                                        "description": "IP de origem a ser bloqueado",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "src_ip"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_wazuh_running_agents",
-            "description": "Get list of currently running/active Wazuh agents",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "buscar_alertas_por_mitre",
+                "description": "Busca alertas de seguranca filtrados por tatica ou ID do MITRE ATT&CK (ex: T1059, T1105)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "mitre_id": {
+                                        "type": "string",
+                                        "default": "T1059",
+                                        "description": "ID da tecnica ou tatica MITRE"
+                                },
+                                "time_range": {
+                                        "type": "string",
+                                        "default": "24h",
+                                        "description": "Janela de tempo"
+                                },
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 50,
+                                        "description": "Limite de alertas"
+                                }
+                        },
+                        "required": []
+                }
         },
         {
-            "name": "check_agent_health",
-            "description": "Check the health status of a specific Wazuh agent",
-            "inputSchema": {
-                "type": "object",
-                "properties": {"agent_id": {"type": "string", "description": "ID of the agent to check"}},
-                "required": ["agent_id"],
-            },
+                "name": "buscar_eventos_fim",
+                "description": "Busca alteracoes de arquivos/registros no FIM (Syscheck)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "agent_id": {
+                                        "type": "string",
+                                        "default": "001",
+                                        "description": "ID do agente"
+                                },
+                                "file_path": {
+                                        "type": "string",
+                                        "description": "Caminho do arquivo ou registro a buscar"
+                                },
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 100,
+                                        "description": "Limite de resultados"
+                                }
+                        },
+                        "required": []
+                }
         },
         {
-            "name": "get_agent_processes",
-            "description": "Get running processes from a specific Wazuh agent",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100},
-                },
-                "required": ["agent_id"],
-            },
+                "name": "buscar_eventos_seguranca",
+                "description": "Busca avancada de eventos de seguranca usando sintaxe Lucene ou filtros estruturados",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "compact": {
+                                        "default": True,
+                                        "description": "Retornar formato compacto",
+                                        "type": "boolean"
+                                },
+                                "dstip": {
+                                        "description": "IP de destino",
+                                        "type": "string"
+                                },
+                                "level": {
+                                        "description": "Nivel minimo de severidade",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de registros",
+                                        "maximum": 1000,
+                                        "type": "integer"
+                                },
+                                "query": {
+                                        "description": "Consulta em formato texto/Lucene",
+                                        "type": "string"
+                                },
+                                "rule_id": {
+                                        "description": "ID da regra",
+                                        "type": "string"
+                                },
+                                "srcip": {
+                                        "description": "IP de origem",
+                                        "type": "string"
+                                },
+                                "time_range": {
+                                        "default": "24h",
+                                        "description": "Intervalo de tempo",
+                                        "enum": [
+                                                "1h",
+                                                "6h",
+                                                "12h",
+                                                "1d",
+                                                "24h",
+                                                "7d",
+                                                "30d"
+                                        ],
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "query"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_agent_ports",
-            "description": "Get open ports from a specific Wazuh agent",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100},
-                },
-                "required": ["agent_id"],
-            },
+                "name": "buscar_logs_gerenciador_wazuh",
+                "description": "Busca em logs internos de diagnostico do servidor Wazuh Manager",
+                "inputSchema": {
+                        "properties": {
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de linhas",
+                                        "maximum": 1000,
+                                        "type": "integer"
+                                },
+                                "query": {
+                                        "description": "Termo de busca nos logs",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "query"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_agent_configuration",
-            "description": "Get configuration details for a specific Wazuh agent",
-            "inputSchema": {
-                "type": "object",
-                "properties": {"agent_id": {"type": "string", "description": "ID of the agent"}},
-                "required": ["agent_id"],
-            },
-        },
-        # Vulnerability Management Tools (3 tools) - Requires Wazuh Indexer (4.8.0+)
-        {
-            "name": "get_wazuh_vulnerabilities",
-            "description": "Retrieve vulnerability information from Wazuh Indexer (requires WAZUH_INDEXER_HOST configuration)",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "Filter by specific agent ID"},
-                    "severity": {
-                        "type": "string",
-                        "enum": ["low", "medium", "high", "critical"],
-                        "description": "Filter by severity level",
-                    },
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 100},
-                    "compact": {
-                        "type": "boolean",
-                        "default": True,
-                        "description": "Return compact vulnerabilities with essential fields only (recommended to avoid token limits)",
-                    },
-                },
-                "required": [],
-            },
+                "name": "buscar_vulnerabilidades_cve",
+                "description": "Busca instancias de um CVE especifico (ex: CVE-2024-30078) no parque de agentes",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "cve_id": {
+                                        "type": "string",
+                                        "description": "ID do CVE (ex: CVE-2024-30078)"
+                                },
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 100,
+                                        "description": "Limite de resultados"
+                                }
+                        },
+                        "required": [
+                                "cve_id"
+                        ]
+                }
         },
         {
-            "name": "get_wazuh_critical_vulnerabilities",
-            "description": "Get critical vulnerabilities from Wazuh Indexer (requires WAZUH_INDEXER_HOST configuration)",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 500, "default": 50},
-                    "compact": {
-                        "type": "boolean",
-                        "default": True,
-                        "description": "Return compact vulnerabilities with essential fields only (recommended to avoid token limits)",
-                    },
-                },
-                "required": [],
-            },
+                "name": "buscar_vulnerabilidades_pacote",
+                "description": "Busca vulnerabilidades associadas a um pacote/software (ex: openssl, python)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "package_name": {
+                                        "type": "string",
+                                        "description": "Nome do pacote"
+                                },
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 100,
+                                        "description": "Limite de resultados"
+                                }
+                        },
+                        "required": [
+                                "package_name"
+                        ]
+                }
         },
         {
-            "name": "get_wazuh_vulnerability_summary",
-            "description": "Get vulnerability summary statistics from Wazuh Indexer (requires WAZUH_INDEXER_HOST configuration)",
-            "inputSchema": {
-                "type": "object",
-                "properties": {"time_range": {"type": "string", "enum": ["1d", "7d", "30d"], "default": "7d"}},
-                "required": [],
-            },
-        },
-        # Security Analysis Tools (6 tools)
-        {
-            "name": "analyze_security_threat",
-            "description": "Analyze a security threat indicator using AI-powered analysis",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "indicator": {
-                        "type": "string",
-                        "description": "The threat indicator to analyze (IP, hash, domain)",
-                    },
-                    "indicator_type": {"type": "string", "enum": ["ip", "hash", "domain", "url"], "default": "ip"},
-                },
-                "required": ["indicator"],
-            },
+                "name": "buscar_vulnerabilidades_severidade",
+                "description": "Filtra vulnerabilidades por nivel de severidade (critical, high, medium, low)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "severity": {
+                                        "type": "string",
+                                        "default": "critical",
+                                        "description": "Nivel de severidade: critical, high, medium, low"
+                                },
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 100,
+                                        "description": "Limite de resultados"
+                                }
+                        },
+                        "required": []
+                }
         },
         {
-            "name": "check_ioc_reputation",
-            "description": "Check reputation of an Indicator of Compromise (IoC)",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "indicator": {"type": "string", "description": "The IoC to check (IP, domain, hash, etc.)"},
-                    "indicator_type": {"type": "string", "enum": ["ip", "domain", "hash", "url"], "default": "ip"},
-                },
-                "required": ["indicator"],
-            },
+                "name": "criar_decodificador_customizado_wazuh",
+                "description": "[ACAO DE ESCRITA] Cria um novo arquivo XML de decodificador customizado no Wazuh Manager (/etc/decoders/{filename})",
+                "inputSchema": {
+                        "properties": {
+                                "content": {
+                                        "description": "Conteudo em formato XML do decodificador customizado",
+                                        "type": "string"
+                                },
+                                "filename": {
+                                        "default": "local_decoder.xml",
+                                        "description": "Nome do arquivo XML de decodificador",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "content"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "perform_risk_assessment",
-            "description": "Perform comprehensive risk assessment for agents or the entire environment",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {
-                        "type": "string",
-                        "description": "Specific agent ID to assess (if None, assess entire environment)",
-                    }
-                },
-                "required": [],
-            },
+                "name": "criar_regra_customizada_wazuh",
+                "description": "[ACAO DE ESCRITA] Cria um novo arquivo de regras customizadas XML no Wazuh Manager (/etc/rules/{filename})",
+                "inputSchema": {
+                        "properties": {
+                                "content": {
+                                        "description": "Conteudo em formato XML da regra customizada",
+                                        "type": "string"
+                                },
+                                "filename": {
+                                        "default": "local_rules.xml",
+                                        "description": "Nome do arquivo XML de regras",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "content"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_top_security_threats",
-            "description": "Get top security threats based on alert frequency and severity",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 50, "default": 10},
-                    "time_range": {"type": "string", "enum": ["1h", "6h", "12h", "1d", "24h", "7d", "30d"], "default": "24h"},
-                },
-                "required": [],
-            },
+                "name": "desabilitar_usuario_wazuh",
+                "description": "[ACAO DE ESCRITA] Desabilita uma conta de usuario comprometida no agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "username": {
+                                        "description": "Nome de usuario",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "username"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "generate_security_report",
-            "description": "Generate comprehensive security report",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "report_type": {
-                        "type": "string",
-                        "enum": ["daily", "weekly", "monthly", "incident"],
-                        "default": "daily",
-                    },
-                    "include_recommendations": {"type": "boolean", "default": True},
-                },
-                "required": [],
-            },
+                "name": "desisolar_host_wazuh",
+                "description": "[ACAO DE ESCRITA] Remove o isolamento de rede do agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "run_compliance_check",
-            "description": "Run compliance check against security frameworks",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "framework": {
-                        "type": "string",
-                        "enum": ["PCI-DSS", "HIPAA", "SOX", "GDPR", "NIST"],
-                        "default": "PCI-DSS",
-                    },
-                    "agent_id": {
-                        "type": "string",
-                        "description": "Specific agent ID to check (if None, check entire environment)",
-                    },
-                },
-                "required": [],
-            },
-        },
-        # System Monitoring Tools (10 tools)
-        {
-            "name": "get_wazuh_statistics",
-            "description": "Get comprehensive Wazuh statistics and metrics",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "encerrar_processo_wazuh",
+                "description": "[ACAO DE ESCRITA] Encerra um processo suspeito informando o PID",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "pid": {
+                                        "description": "PID do processo",
+                                        "type": "integer"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "pid"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_wazuh_weekly_stats",
-            "description": "Get weekly statistics from Wazuh including alerts, agents, and trends",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "estatisticas_mitre",
+                "description": "Gera resumo estatistico das top taticas e tecnicas MITRE ATT&CK disparadas no ambiente",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "time_range": {
+                                        "type": "string",
+                                        "default": "24h",
+                                        "description": "Janela de tempo"
+                                }
+                        },
+                        "required": []
+                }
         },
         {
-            "name": "get_wazuh_cluster_health",
-            "description": "Get Wazuh cluster health information",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "excluir_decodificador_customizado_wazuh",
+                "description": "[ACAO DE ESCRITA] Exclui um arquivo XML de decodificador customizado do Wazuh Manager",
+                "inputSchema": {
+                        "properties": {
+                                "filename": {
+                                        "description": "Nome do arquivo XML de decodificador a excluir",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "filename"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_wazuh_cluster_nodes",
-            "description": "Get information about Wazuh cluster nodes",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "excluir_regra_customizada_wazuh",
+                "description": "[ACAO DE ESCRITA] Exclui um arquivo XML de regras customizadas do Wazuh Manager",
+                "inputSchema": {
+                        "properties": {
+                                "filename": {
+                                        "description": "Nome do arquivo XML de regras a excluir",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "filename"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_wazuh_rules_summary",
-            "description": "Get summary of Wazuh rules and their effectiveness",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "executar_avaliacao_risco",
+                "description": "Calcula a pontuacao de risco global e identifica fatores de risco do ambiente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_wazuh_remoted_stats",
-            "description": "Get Wazuh remoted (agent communication) statistics",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "executar_teste_conformidade",
+                "description": "Executa verificacoes de conformidade em padroes de seguranca (PCI-DSS, CIS, GDPR, HIPAA, NIST, SOX)",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "framework": {
+                                        "description": "Padrao de conformidade",
+                                        "enum": [
+                                                "PCI-DSS",
+                                                "CIS",
+                                                "GDPR",
+                                                "HIPAA",
+                                                "NIST",
+                                                "SOX"
+                                        ],
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "framework"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "get_wazuh_log_collector_stats",
-            "description": "Get Wazuh log collector statistics",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
+                "name": "gerar_relatorio_cis",
+                "description": "Gera relatorio de aderencia e pontuacao de conformidade CIS Benchmark do agente",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "agent_id": {
+                                        "type": "string",
+                                        "default": "001",
+                                        "description": "ID do agente"
+                                }
+                        },
+                        "required": []
+                }
         },
         {
-            "name": "search_wazuh_manager_logs",
-            "description": "Search Wazuh manager logs for specific patterns",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "query": {"type": "string", "description": "Search query/pattern"},
-                    "limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100},
-                },
-                "required": ["query"],
-            },
+                "name": "gerar_relatorio_lgpd",
+                "description": "Gera relatorio de governanca de dados, privacidade e conformidade LGPD (Art. 46)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "time_range": {
+                                        "type": "string",
+                                        "default": "24h",
+                                        "description": "Janela de tempo"
+                                }
+                        },
+                        "required": []
+                }
         },
         {
-            "name": "get_wazuh_manager_error_logs",
-            "description": "Get recent error logs from Wazuh manager",
-            "inputSchema": {
-                "type": "object",
-                "properties": {"limit": {"type": "integer", "minimum": 1, "maximum": 1000, "default": 100}},
-                "required": [],
-            },
+                "name": "gerar_relatorio_nist",
+                "description": "Gera relatorio automatizado de auditoria e conformidade NIST SP 800-53",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "time_range": {
+                                        "type": "string",
+                                        "default": "24h",
+                                        "description": "Janela de tempo"
+                                }
+                        },
+                        "required": []
+                }
         },
         {
-            "name": "validate_wazuh_connection",
-            "description": "Validate connection to Wazuh server and return status",
-            "inputSchema": {"type": "object", "properties": {}, "required": []},
-        },
-        # Active Response / Action Tools (9 tools)
-        {
-            "name": "wazuh_block_ip",
-            "description": "[ACTION] Block an IP address via Wazuh active response firewall-drop. Risk: LOW, Reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "ip_address": {"type": "string", "description": "IP address to block"},
-                    "duration": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "default": 0,
-                        "description": "Block duration in seconds (0 = permanent)",
-                    },
-                    "agent_id": {"type": "string", "description": "Target agent ID (empty = all agents)"},
-                },
-                "required": ["ip_address"],
-            },
-        },
-        {
-            "name": "wazuh_isolate_host",
-            "description": "[ACTION] Isolate a host from the network via active response. Risk: MEDIUM, Reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {"agent_id": {"type": "string", "description": "ID of the agent to isolate"}},
-                "required": ["agent_id"],
-            },
+                "name": "gerar_relatorio_seguranca",
+                "description": "Gera um relatorio de seguranca consolidado (diario, semanal ou mensal)",
+                "inputSchema": {
+                        "properties": {
+                                "include_recommendations": {
+                                        "default": True,
+                                        "description": "Incluir recomendacoes",
+                                        "type": "boolean"
+                                },
+                                "report_type": {
+                                        "default": "daily",
+                                        "description": "Tipo de relatorio",
+                                        "enum": [
+                                                "daily",
+                                                "weekly",
+                                                "monthly",
+                                                "incident"
+                                        ],
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_kill_process",
-            "description": "[ACTION] Terminate a process on an agent via active response. Risk: MEDIUM, Not reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "process_id": {"type": "integer", "description": "PID of the process to kill"},
-                },
-                "required": ["agent_id", "process_id"],
-            },
+                "name": "gerenciar_grupos_agente",
+                "description": "[ACAO DE ESCRITA] Gerencia a associacao de agentes ou cria/exclui grupos globais no Wazuh (add, remove, set, create, delete)",
+                "inputSchema": {
+                        "properties": {
+                                "action": {
+                                        "description": "Acao a realizar (add, remove, set, create, delete)",
+                                        "enum": [
+                                                "add",
+                                                "remove",
+                                                "set",
+                                                "create",
+                                                "delete"
+                                        ],
+                                        "type": "string"
+                                },
+                                "agent_id": {
+                                        "description": "ID do agente (obrigatorio para add, remove, set)",
+                                        "type": "string"
+                                },
+                                "group_id": {
+                                        "description": "Nome/ID do grupo",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "action",
+                                "group_id"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_disable_user",
-            "description": "[ACTION] Disable a user account on an agent via active response. Risk: HIGH, Reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "username": {"type": "string", "description": "Username to disable"},
-                },
-                "required": ["agent_id", "username"],
-            },
+                "name": "habilitar_usuario_wazuh",
+                "description": "[ACAO DE ESCRITA] Reabilita uma conta de usuario desabilitada",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "username": {
+                                        "description": "Nome de usuario",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "username"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_quarantine_file",
-            "description": "[ACTION] Quarantine a file on an agent via active response. Risk: LOW, Reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "file_path": {"type": "string", "description": "Path of the file to quarantine"},
-                },
-                "required": ["agent_id", "file_path"],
-            },
+                "name": "investigar_incidente_wazuh",
+                "description": "Orquestra automaticamente uma investigacao completa de incidente SOC/DFIR em 11 etapas (alertas, agente, processos, portas, vulnerabilidades, FIM, IOC, MITRE, timeline, risco e contencao)",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "default": "001",
+                                        "description": "ID do agente a investigar (ex: 001)",
+                                        "type": "string"
+                                },
+                                "alert_id": {
+                                        "description": "ID especifico do alerta (opcional)",
+                                        "type": "string"
+                                },
+                                "ioc": {
+                                        "description": "IP, dominio ou hash para analise de reputacao (opcional)",
+                                        "type": "string"
+                                },
+                                "rule_id": {
+                                        "description": "ID especifico da regra (opcional)",
+                                        "type": "string"
+                                },
+                                "time_range": {
+                                        "default": "24h",
+                                        "description": "Janela de tempo para analise (ex: 24h, 7d)",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_active_response",
-            "description": "[ACTION] Execute a generic Wazuh active response command. Risk: HIGH, Not reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "command": {"type": "string", "description": "Active response command name"},
-                    "parameters": {"type": "object", "description": "Optional command parameters"},
-                },
-                "required": ["agent_id", "command"],
-            },
+                "name": "isolar_host_wazuh",
+                "description": "[ACAO DE ESCRITA] Isola um host comprometido da rede",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente a isolar",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_firewall_drop",
-            "description": "[ACTION] Add a firewall drop rule on an agent via active response. Risk: MEDIUM, Reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "src_ip": {"type": "string", "description": "Source IP address to drop"},
-                    "duration": {
-                        "type": "integer",
-                        "minimum": 0,
-                        "default": 0,
-                        "description": "Duration in seconds (0 = permanent)",
-                    },
-                },
-                "required": ["agent_id", "src_ip"],
-            },
+                "name": "modificar_decodificador_customizado_wazuh",
+                "description": "[ACAO DE ESCRITA] Modifica ou substitui o conteudo XML de um arquivo de decodificador customizado existente",
+                "inputSchema": {
+                        "properties": {
+                                "content": {
+                                        "description": "Novo conteudo em formato XML",
+                                        "type": "string"
+                                },
+                                "filename": {
+                                        "default": "local_decoder.xml",
+                                        "description": "Nome do arquivo XML de decodificador",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "content"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_host_deny",
-            "description": "[ACTION] Add an entry to hosts.deny on an agent via active response. Risk: MEDIUM, Reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "src_ip": {"type": "string", "description": "Source IP address to deny"},
-                },
-                "required": ["agent_id", "src_ip"],
-            },
+                "name": "modificar_regra_customizada_wazuh",
+                "description": "[ACAO DE ESCRITA] Modifica ou substitui o conteudo XML de um arquivo de regras customizadas existente",
+                "inputSchema": {
+                        "properties": {
+                                "content": {
+                                        "description": "Novo conteudo em formato XML",
+                                        "type": "string"
+                                },
+                                "filename": {
+                                        "default": "local_rules.xml",
+                                        "description": "Nome do arquivo XML de regras",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "content"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_restart",
-            "description": "[ACTION] Restart Wazuh agent or manager service. Risk: CRITICAL, Not reversible.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "target": {
-                        "type": "string",
-                        "description": "Agent ID or 'manager' to restart",
-                    }
-                },
-                "required": ["target"],
-            },
-        },
-        # Verification Tools (5 tools)
-        {
-            "name": "wazuh_check_blocked_ip",
-            "description": "Check if an IP was blocked by searching active response alert history (not live firewall state)",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "ip_address": {"type": "string", "description": "IP address to check"},
-                    "agent_id": {"type": "string", "description": "Filter by agent ID (optional)"},
-                },
-                "required": ["ip_address"],
-            },
+                "name": "negar_host_wazuh",
+                "description": "[ACAO DE ESCRITA] Adiciona um IP a lista de negacao do host",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "src_ip": {
+                                        "description": "IP de origem",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "src_ip"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_check_agent_isolation",
-            "description": "Check agent isolation status via connectivity and active response alert history (not live network state)",
-            "inputSchema": {
-                "type": "object",
-                "properties": {"agent_id": {"type": "string", "description": "ID of the agent to check"}},
-                "required": ["agent_id"],
-            },
+                "name": "obter_agentes_ativos_wazuh",
+                "description": "Retorna exclusivamente a lista de agentes que estao ativos e conectados",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_check_process",
-            "description": "Check if a specific process is running on an agent",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "process_id": {"type": "integer", "description": "PID to check"},
-                },
-                "required": ["agent_id", "process_id"],
-            },
+                "name": "obter_agentes_wazuh",
+                "description": "Lista os agentes cadastrados no cluster do Wazuh com seus metadados",
+                "inputSchema": {
+                        "properties": {
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de agentes",
+                                        "maximum": 500,
+                                        "type": "integer"
+                                },
+                                "q": {
+                                        "description": "Filtro de busca por nome ou IP",
+                                        "type": "string"
+                                },
+                                "status": {
+                                        "description": "Filtrar por status",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_check_user_status",
-            "description": "Check if a user account was disabled by searching active response alert history (not live OS state)",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "username": {"type": "string", "description": "Username to check"},
-                },
-                "required": ["agent_id", "username"],
-            },
+                "name": "obter_alertas_wazuh",
+                "description": "Busca alertas de seguranca do Wazuh com filtros opcionais de nivel, regra, agente e data",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "Filtrar por ID de agente especifico (ex: 001)",
+                                        "type": "string"
+                                },
+                                "compact": {
+                                        "default": True,
+                                        "description": "Retornar formato compacto",
+                                        "type": "boolean"
+                                },
+                                "level": {
+                                        "description": "Filtrar por nivel de severidade (ex: 12, 10+)",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite maximo de alertas a retornar",
+                                        "maximum": 1000,
+                                        "type": "integer"
+                                },
+                                "rule_id": {
+                                        "description": "Filtrar por ID de regra especifica (ex: 92213)",
+                                        "type": "string"
+                                },
+                                "timestamp_end": {
+                                        "description": "Data/hora final em formato ISO",
+                                        "type": "string"
+                                },
+                                "timestamp_start": {
+                                        "description": "Data/hora inicial em formato ISO",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_check_file_quarantine",
-            "description": "Check if a file has been quarantined on an agent",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "file_path": {"type": "string", "description": "Path of the file to check"},
-                },
-                "required": ["agent_id", "file_path"],
-            },
-        },
-        # Rollback Tools (5 tools)
-        {
-            "name": "wazuh_unisolate_host",
-            "description": "[ACTION] Remove host network isolation. Risk: MEDIUM, Reversal of isolate_host.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {"agent_id": {"type": "string", "description": "ID of the agent to unisolate"}},
-                "required": ["agent_id"],
-            },
-        },
-        {
-            "name": "wazuh_enable_user",
-            "description": "[ACTION] Re-enable a disabled user account. Risk: HIGH, Reversal of disable_user.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "username": {"type": "string", "description": "Username to re-enable"},
-                },
-                "required": ["agent_id", "username"],
-            },
+                "name": "obter_alteracoes_fim_agente",
+                "description": "Consulta alteracoes de integridade de arquivos (FIM / Syscheck) em um agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "event_type": {
+                                        "description": "Tipo de evento (added, modified, deleted)",
+                                        "type": "string"
+                                },
+                                "file_path": {
+                                        "description": "Caminho especifico do arquivo",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de alteracoes",
+                                        "maximum": 500,
+                                        "type": "integer"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_restore_file",
-            "description": "[ACTION] Restore a quarantined file. Risk: LOW, Reversal of quarantine_file.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "file_path": {"type": "string", "description": "Path of the file to restore"},
-                },
-                "required": ["agent_id", "file_path"],
-            },
+                "name": "obter_arquivo_monitorado",
+                "description": "Consulta os detalhes e modificacoes de um arquivo/registro especifico monitorado pelo FIM",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "agent_id": {
+                                        "type": "string",
+                                        "default": "001",
+                                        "description": "ID do agente"
+                                },
+                                "file_path": {
+                                        "type": "string",
+                                        "description": "Caminho exato do arquivo"
+                                }
+                        },
+                        "required": [
+                                "file_path"
+                        ]
+                }
         },
         {
-            "name": "wazuh_firewall_allow",
-            "description": "[ACTION] Remove a firewall drop rule. Risk: MEDIUM, Reversal of firewall_drop.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "src_ip": {"type": "string", "description": "Source IP to unblock"},
-                },
-                "required": ["agent_id", "src_ip"],
-            },
+                "name": "obter_configuracao_agente",
+                "description": "Obtem as configuracoes e grupos de um agente monitorado",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "component": {
+                                        "description": "Componente especifico da configuracao",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
         },
         {
-            "name": "wazuh_host_allow",
-            "description": "[ACTION] Remove a hosts.deny entry. Risk: MEDIUM, Reversal of host_deny.",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "agent_id": {"type": "string", "description": "ID of the agent"},
-                    "src_ip": {"type": "string", "description": "Source IP to allow"},
-                },
-                "required": ["agent_id", "src_ip"],
-            },
+                "name": "obter_dashboard_alertas",
+                "description": "Retorna dados consolidados para dashboard executivo de alertas de seguranca",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "time_range": {
+                                        "type": "string",
+                                        "default": "24h",
+                                        "description": "Janela de tempo"
+                                }
+                        },
+                        "required": []
+                }
         },
-    ]
+        {
+                "name": "obter_dashboard_vulnerabilidades",
+                "description": "Retorna dados consolidados para dashboard executivo de vulnerabilidades/CVEs",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {},
+                        "required": []
+                }
+        },
+        {
+                "name": "obter_detalhes_regra_wazuh",
+                "description": "Inspeciona a definicao XML, arquivo de origem e expressoes de uma regra pelo ID",
+                "inputSchema": {
+                        "properties": {
+                                "rule_id": {
+                                        "description": "ID da regra a inspecionar",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "rule_id"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_estatisticas_coletor_logs_wazuh",
+                "description": "Obtem estatisticas do servico coletor e decodificador de logs (wazuh-analysisd)",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_estatisticas_fim",
+                "description": "Retorna estatisticas globais do modulo de Integridade de Arquivos (Syscheck/FIM)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "agent_id": {
+                                        "type": "string",
+                                        "default": "001",
+                                        "description": "ID do agente"
+                                }
+                        },
+                        "required": []
+                }
+        },
+        {
+                "name": "obter_estatisticas_remoted_wazuh",
+                "description": "Obtem estatisticas do servico de recepcao remota de eventos (wazuh-remoted)",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_estatisticas_semanais_wazuh",
+                "description": "Obtem estatisticas semanais acumuladas do servidor Wazuh",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_estatisticas_wazuh",
+                "description": "Obtem estatisticas gerais de desempenho do servidor Wazuh Manager",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_falhas_conformidade",
+                "description": "Retorna apenas os testes de conformidade com falha no agente (/sca/{agent_id}/checks?result=failed)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "agent_id": {
+                                        "type": "string",
+                                        "default": "001",
+                                        "description": "ID do agente"
+                                },
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 100,
+                                        "description": "Limite de itens"
+                                }
+                        },
+                        "required": []
+                }
+        },
+        {
+                "name": "obter_logs_erro_gerenciador_wazuh",
+                "description": "Retorna erros recentes registrados pelo servidor Wazuh Manager",
+                "inputSchema": {
+                        "properties": {
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de erros",
+                                        "maximum": 1000,
+                                        "type": "integer"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_nos_cluster_wazuh",
+                "description": "Lista os nos participantes do cluster Wazuh",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_pacotes_agente",
+                "description": "Lista os softwares e pacotes instalados em um agente (via Syscollector)",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de pacotes",
+                                        "maximum": 500,
+                                        "type": "integer"
+                                },
+                                "search": {
+                                        "description": "Filtro de busca por nome ou fornecedor",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_politicas_conformidade",
+                "description": "Lista as politicas SCA ativas no agente (/sca/{agent_id})",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "agent_id": {
+                                        "type": "string",
+                                        "default": "001",
+                                        "description": "ID do agente"
+                                }
+                        },
+                        "required": []
+                }
+        },
+        {
+                "name": "obter_portas_agente",
+                "description": "Lista as portas de rede abertas e conexoes ativas em um agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de portas",
+                                        "maximum": 500,
+                                        "type": "integer"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_principais_ameacas_seguranca",
+                "description": "Retorna as principais ameacas de seguranca ativas no momento",
+                "inputSchema": {
+                        "properties": {
+                                "limit": {
+                                        "default": 10,
+                                        "description": "Limite de ameacas",
+                                        "maximum": 50,
+                                        "type": "integer"
+                                },
+                                "time_range": {
+                                        "default": "24h",
+                                        "description": "Intervalo de tempo",
+                                        "enum": [
+                                                "1h",
+                                                "6h",
+                                                "12h",
+                                                "1d",
+                                                "24h",
+                                                "7d",
+                                                "30d"
+                                        ],
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_processos_agente",
+                "description": "Lista os processos em execucao em um agente monitorado",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de processos",
+                                        "maximum": 500,
+                                        "type": "integer"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_resultados_conformidade",
+                "description": "Busca os resultados de avaliacoes de seguranca SCA/CIS do agente (/sca/{agent_id}/checks)",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "agent_id": {
+                                        "type": "string",
+                                        "default": "001",
+                                        "description": "ID do agente (ex: 001)"
+                                },
+                                "policy_id": {
+                                        "type": "string",
+                                        "description": "ID da politica de conformidade (opcional)"
+                                },
+                                "result_filter": {
+                                        "type": "string",
+                                        "description": "Filtro por resultado: passed ou failed (opcional)"
+                                },
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 100,
+                                        "description": "Limite de itens"
+                                }
+                        },
+                        "required": []
+                }
+        },
+        {
+                "name": "obter_resumo_alertas_wazuh",
+                "description": "Retorna um resumo estatistico dos alertas do Wazuh agrupados por nivel ou campo",
+                "inputSchema": {
+                        "properties": {
+                                "group_by": {
+                                        "default": "rule.level",
+                                        "description": "Campo para agrupamento dos alertas",
+                                        "type": "string"
+                                },
+                                "time_range": {
+                                        "default": "24h",
+                                        "description": "Intervalo de tempo",
+                                        "enum": [
+                                                "1h",
+                                                "6h",
+                                                "12h",
+                                                "1d",
+                                                "24h",
+                                                "7d",
+                                                "30d"
+                                        ],
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_resumo_decodificadores_wazuh",
+                "description": "Lista os arquivos de decodificadores XML ativos no Wazuh Manager (/decoders/files)",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_resumo_regras_wazuh",
+                "description": "Retorna a contagem e distribuicao das regras de alerta do Wazuh por nivel de severidade",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_resumo_vulnerabilidades_wazuh",
+                "description": "Gera um resumo estatistico das vulnerabilidades por pacote e severidade",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_saude_cluster_wazuh",
+                "description": "Verifica o status de saude e desempenho do cluster Wazuh",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_tecnicas_mitre",
+                "description": "Lista as tecnicas e taticas MITRE ATT&CK registradas na base de regras do Wazuh",
+                "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                                "limit": {
+                                        "type": "integer",
+                                        "default": 100,
+                                        "description": "Limite de itens"
+                                }
+                        },
+                        "required": []
+                }
+        },
+        {
+                "name": "obter_vulnerabilidades_criticas_wazuh",
+                "description": "Retorna exclusivamente vulnerabilidades de severidade critica ou alta",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de vulnerabilidades",
+                                        "maximum": 500,
+                                        "type": "integer"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "obter_vulnerabilidades_wazuh",
+                "description": "Consulta vulnerabilidades (CVEs) encontradas nos agentes",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "cve": {
+                                        "description": "ID de uma CVE especifica",
+                                        "type": "string"
+                                },
+                                "limit": {
+                                        "default": 100,
+                                        "description": "Limite de registros",
+                                        "maximum": 500,
+                                        "type": "integer"
+                                },
+                                "severity": {
+                                        "description": "Severidade (Critical, High, Medium, Low)",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "permitir_firewall_wazuh",
+                "description": "[ACAO DE ESCRITA] Remove regra de bloqueio do firewall",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "src_ip": {
+                                        "description": "IP a permitir",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "src_ip"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "permitir_host_wazuh",
+                "description": "[ACAO DE ESCRITA] Remove um IP da lista de negacao do host",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "src_ip": {
+                                        "description": "IP a permitir",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "src_ip"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "quarentena_arquivo_wazuh",
+                "description": "[ACAO DE ESCRITA] Move um arquivo suspeito para a quarentena",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "file_path": {
+                                        "description": "Caminho do arquivo",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "file_path"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "reiniciar_servico_wazuh",
+                "description": "[ACAO DE ESCRITA] Reinicia o servico do agente Wazuh ou do manager",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "resposta_ativa_wazuh",
+                "description": "[ACAO DE ESCRITA] Dispara uma resposta ativa arbitraria em um agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "arguments": {
+                                        "description": "Argumentos adicionais",
+                                        "items": {
+                                                "type": "string"
+                                        },
+                                        "type": "array"
+                                },
+                                "command": {
+                                        "description": "Comando de resposta ativa",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "command",
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "restaurar_arquivo_wazuh",
+                "description": "[ACAO DE ESCRITA] Restaura um arquivo da quarentena para o local original",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "file_path": {
+                                        "description": "Caminho do arquivo",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "file_path"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "testar_mensagem_log_wazuh",
+                "description": "Testa uma linha de log bruta no simulador do Wazuh (wazuh-logtest)",
+                "inputSchema": {
+                        "properties": {
+                                "location": {
+                                        "default": "syslog",
+                                        "description": "Origem/cabecalho do log",
+                                        "type": "string"
+                                },
+                                "log_message": {
+                                        "description": "Linha de log bruta para testar",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "log_message"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "validar_conexao_wazuh",
+                "description": "Valida a conectividade da API REST com o servidor Wazuh",
+                "inputSchema": {
+                        "properties": {},
+                        "required": [],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "verificar_ip_bloqueado_wazuh",
+                "description": "Confirma se um IP permanece bloqueado no agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "src_ip": {
+                                        "description": "IP a verificar",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "src_ip"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "verificar_isolamento_agente_wazuh",
+                "description": "Confirma se o isolamento de rede do agente esta ativo",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "verificar_processo_wazuh",
+                "description": "Verifica se um processo especifico ainda esta rodando no agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "pid": {
+                                        "description": "PID do processo",
+                                        "type": "integer"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "pid"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "verificar_quarentena_arquivo_wazuh",
+                "description": "Confirma se o arquivo esta contido na quarentena do agente",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "file_path": {
+                                        "description": "Caminho do arquivo",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "file_path"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "verificar_reputacao_ioc",
+                "description": "Consulta a reputacao de um Indicador de Comprometimento (IP, hash ou dominio)",
+                "inputSchema": {
+                        "properties": {
+                                "ioc_type": {
+                                        "description": "Tipo do IOC",
+                                        "enum": [
+                                                "ip",
+                                                "hash",
+                                                "domain"
+                                        ],
+                                        "type": "string"
+                                },
+                                "ioc_value": {
+                                        "description": "Valor do IOC",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "ioc_type",
+                                "ioc_value"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "verificar_saude_agente",
+                "description": "Verifica o status detalhado de saude, versao e keep-alive de um agente especifico",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id"
+                        ],
+                        "type": "object"
+                }
+        },
+        {
+                "name": "verificar_status_usuario_wazuh",
+                "description": "Verifica o estado atual da conta do usuario (ativo ou bloqueado)",
+                "inputSchema": {
+                        "properties": {
+                                "agent_id": {
+                                        "description": "ID do agente",
+                                        "type": "string"
+                                },
+                                "username": {
+                                        "description": "Nome de usuario",
+                                        "type": "string"
+                                }
+                        },
+                        "required": [
+                                "agent_id",
+                                "username"
+                        ],
+                        "type": "object"
+                }
+        }
+]
 
     # Filter tools by session scopes: hide write tools from read-only or unknown tokens
     auth_token = getattr(session, "_auth_token", None)
@@ -1867,11 +2866,11 @@ async def handle_tools_list(params: Dict[str, Any], session: MCPSession) -> Dict
         tools = [t for t in tools if t["name"] not in WRITE_SCOPE_TOOLS]
 
     # Pagination support per MCP spec
-    return {"tools": tools}  # No more tools
+    return {"tools": tools}
 
 
 async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict[str, Any]:
-    """Handle tools/call method - All 48 Wazuh Security Tools with comprehensive validation."""
+    """Handle tools/call method - All 53 Wazuh Security Tools with comprehensive validation."""
     tool_name = params.get("name")
     arguments = params.get("arguments", {})
 
@@ -1923,7 +2922,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
 
     try:
         # Alert Management Tools
-        if tool_name == "get_wazuh_alerts":
+        if tool_name == "obter_alertas_wazuh":
             # Validate all parameters
             limit = validate_limit(arguments.get("limit"), max_val=1000)
             rule_id = validate_rule_id(arguments.get("rule_id"))
@@ -1958,7 +2957,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Wazuh Alerts:\n{json.dumps(result, indent=2 if not compact else None, default=str)}")
 
-        elif tool_name == "get_wazuh_alert_summary":
+        elif tool_name == "obter_resumo_alertas_wazuh":
             time_range = validate_time_range(arguments.get("time_range"))
             group_by = arguments.get("group_by", "rule.level")
             # Validate group_by to prevent injection (only allow safe dotted field paths)
@@ -1973,7 +2972,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Alert Summary:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "analyze_alert_patterns":
+        elif tool_name == "analisar_padroes_alertas":
             time_range = validate_time_range(arguments.get("time_range"))
             min_frequency = validate_limit(
                 arguments.get("min_frequency"), min_val=1, max_val=1000, default=5, param_name="min_frequency"
@@ -1982,7 +2981,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Alert Patterns:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "search_security_events":
+        elif tool_name == "buscar_eventos_seguranca":
             query = validate_query(arguments.get("query"), required=True)
             time_range = validate_time_range(arguments.get("time_range"))
             limit = validate_limit(arguments.get("limit"), max_val=1000)
@@ -2016,7 +3015,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             return _tool_result(f"Security Events:\n{json.dumps(result, indent=2 if not compact else None, default=str)}")
 
         # Agent Management Tools
-        elif tool_name == "get_wazuh_agents":
+        elif tool_name == "obter_agentes_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"))
             status = validate_agent_status(arguments.get("status"))
             limit = validate_limit(arguments.get("limit"), max_val=1000)
@@ -2025,39 +3024,39 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Wazuh Agents:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_running_agents":
+        elif tool_name == "obter_agentes_ativos_wazuh":
             result = await wazuh_client.get_running_agents()
             _success = True
             return _tool_result(f"Running Agents:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "check_agent_health":
+        elif tool_name == "verificar_saude_agente":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             result = await wazuh_client.check_agent_health(agent_id)
             _success = True
             return _tool_result(f"Agent Health:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_agent_processes":
+        elif tool_name == "obter_processos_agente":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             limit = validate_limit(arguments.get("limit"), max_val=1000)
             result = await wazuh_client.get_agent_processes(agent_id, limit)
             _success = True
             return _tool_result(f"Agent Processes:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_agent_ports":
+        elif tool_name == "obter_portas_agente":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             limit = validate_limit(arguments.get("limit"), max_val=1000)
             result = await wazuh_client.get_agent_ports(agent_id, limit)
             _success = True
             return _tool_result(f"Agent Ports:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_agent_configuration":
+        elif tool_name == "obter_configuracao_agente":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             result = await wazuh_client.get_agent_configuration(agent_id)
             _success = True
             return _tool_result(f"Agent Configuration:\n{json.dumps(result, indent=2, default=str)}")
 
         # Vulnerability Management Tools
-        elif tool_name == "get_wazuh_vulnerabilities":
+        elif tool_name == "obter_vulnerabilidades_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"))
             severity = validate_severity(arguments.get("severity"))
             limit = validate_limit(arguments.get("limit"), max_val=500)
@@ -2070,7 +3069,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Vulnerabilities:\n{json.dumps(result, indent=2 if not compact else None, default=str)}")
 
-        elif tool_name == "get_wazuh_critical_vulnerabilities":
+        elif tool_name == "obter_vulnerabilidades_criticas_wazuh":
             limit = validate_limit(arguments.get("limit"), max_val=500, default=50, param_name="limit")
             compact = validate_boolean(arguments.get("compact"), default=True, param_name="compact")
 
@@ -2081,14 +3080,14 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Critical Vulnerabilities:\n{json.dumps(result, indent=2 if not compact else None, default=str)}")
 
-        elif tool_name == "get_wazuh_vulnerability_summary":
+        elif tool_name == "obter_resumo_vulnerabilidades_wazuh":
             time_range = validate_time_range(arguments.get("time_range"))
             result = await wazuh_client.get_vulnerability_summary(time_range)
             _success = True
             return _tool_result(f"Vulnerability Summary:\n{json.dumps(result, indent=2, default=str)}")
 
         # Security Analysis Tools
-        elif tool_name == "analyze_security_threat":
+        elif tool_name == "analisar_ameaca_seguranca":
             indicator_type = validate_indicator_type(arguments.get("indicator_type"))
             indicator = validate_indicator(arguments.get("indicator"), indicator_type)
 
@@ -2096,7 +3095,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Threat Analysis:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "check_ioc_reputation":
+        elif tool_name == "verificar_reputacao_ioc":
             indicator_type = validate_indicator_type(arguments.get("indicator_type"))
             indicator = validate_indicator(arguments.get("indicator"), indicator_type)
 
@@ -2104,13 +3103,13 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"IoC Reputation:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "perform_risk_assessment":
+        elif tool_name == "executar_avaliacao_risco":
             agent_id = validate_agent_id(arguments.get("agent_id"))
             result = await wazuh_client.perform_risk_assessment(agent_id)
             _success = True
             return _tool_result(f"Risk Assessment:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_top_security_threats":
+        elif tool_name == "obter_principais_ameacas_seguranca":
             limit = validate_limit(arguments.get("limit"), min_val=1, max_val=50, default=10)
             time_range = validate_time_range(arguments.get("time_range"))
 
@@ -2118,7 +3117,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Top Security Threats:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "generate_security_report":
+        elif tool_name == "gerar_relatorio_seguranca":
             report_type = validate_report_type(arguments.get("report_type"))
             include_recommendations = validate_boolean(
                 arguments.get("include_recommendations"), default=True, param_name="include_recommendations"
@@ -2128,7 +3127,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Security Report:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "run_compliance_check":
+        elif tool_name == "executar_teste_conformidade":
             framework = validate_compliance_framework(arguments.get("framework"))
             agent_id = validate_agent_id(arguments.get("agent_id"))
 
@@ -2137,42 +3136,42 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             return _tool_result(f"Compliance Check:\n{json.dumps(result, indent=2, default=str)}")
 
         # System Monitoring Tools
-        elif tool_name == "get_wazuh_statistics":
+        elif tool_name == "obter_estatisticas_wazuh":
             result = await wazuh_client.get_wazuh_statistics()
             _success = True
             return _tool_result(f"Wazuh Statistics:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_weekly_stats":
+        elif tool_name == "obter_estatisticas_semanais_wazuh":
             result = await wazuh_client.get_weekly_stats()
             _success = True
             return _tool_result(f"Weekly Statistics:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_cluster_health":
+        elif tool_name == "obter_saude_cluster_wazuh":
             result = await wazuh_client.get_cluster_health()
             _success = True
             return _tool_result(f"Cluster Health:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_cluster_nodes":
+        elif tool_name == "obter_nos_cluster_wazuh":
             result = await wazuh_client.get_cluster_nodes()
             _success = True
             return _tool_result(f"Cluster Nodes:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_rules_summary":
+        elif tool_name == "obter_resumo_regras_wazuh":
             result = await wazuh_client.get_rules_summary()
             _success = True
             return _tool_result(f"Rules Summary:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_remoted_stats":
+        elif tool_name == "obter_estatisticas_remoted_wazuh":
             result = await wazuh_client.get_remoted_stats()
             _success = True
             return _tool_result(f"Remoted Statistics:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_log_collector_stats":
+        elif tool_name == "obter_estatisticas_coletor_logs_wazuh":
             result = await wazuh_client.get_log_collector_stats()
             _success = True
             return _tool_result(f"Log Collector Statistics:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "search_wazuh_manager_logs":
+        elif tool_name == "buscar_logs_gerenciador_wazuh":
             query = validate_query(arguments.get("query"), required=True)
             limit = validate_limit(arguments.get("limit"), max_val=1000)
 
@@ -2180,19 +3179,19 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Manager Logs:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "get_wazuh_manager_error_logs":
+        elif tool_name == "obter_logs_erro_gerenciador_wazuh":
             limit = validate_limit(arguments.get("limit"), max_val=1000)
             result = await wazuh_client.get_manager_error_logs(limit)
             _success = True
             return _tool_result(f"Manager Error Logs:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "validate_wazuh_connection":
+        elif tool_name == "validar_conexao_wazuh":
             result = await wazuh_client.validate_connection()
             _success = True
             return _tool_result(f"Connection Validation:\n{json.dumps(result, indent=2, default=str)}")
 
         # Active Response / Action Tools
-        elif tool_name == "wazuh_block_ip":
+        elif tool_name == "bloquear_ip_wazuh":
             ip_address = validate_ip_address(arguments.get("ip_address"), required=True)
             duration = (
                 validate_limit(arguments.get("duration"), min_val=0, max_val=86400, param_name="duration")
@@ -2204,13 +3203,13 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Block IP Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_isolate_host":
+        elif tool_name == "isolar_host_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             result = await wazuh_client.isolate_host(agent_id)
             _success = True
             return _tool_result(f"Isolate Host Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_kill_process":
+        elif tool_name == "encerrar_processo_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             process_id = arguments.get("process_id")
             if process_id is None:
@@ -2220,21 +3219,21 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Kill Process Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_disable_user":
+        elif tool_name == "desabilitar_usuario_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             username = validate_username(arguments.get("username"), required=True)
             result = await wazuh_client.disable_user(agent_id, username)
             _success = True
             return _tool_result(f"Disable User Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_quarantine_file":
+        elif tool_name == "quarentena_arquivo_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             file_path = validate_file_path(arguments.get("file_path"), required=True)
             result = await wazuh_client.quarantine_file(agent_id, file_path)
             _success = True
             return _tool_result(f"Quarantine File Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_active_response":
+        elif tool_name == "resposta_ativa_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             command = validate_active_response_command(arguments.get("command"), required=True)
             parameters = arguments.get("parameters")
@@ -2242,7 +3241,7 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Active Response Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_firewall_drop":
+        elif tool_name == "bloquear_firewall_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             src_ip = validate_ip_address(arguments.get("src_ip"), required=True, param_name="src_ip")
             duration = (
@@ -2254,14 +3253,14 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Firewall Drop Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_host_deny":
+        elif tool_name == "negar_host_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             src_ip = validate_ip_address(arguments.get("src_ip"), required=True, param_name="src_ip")
             result = await wazuh_client.host_deny(agent_id, src_ip)
             _success = True
             return _tool_result(f"Host Deny Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_restart":
+        elif tool_name == "reiniciar_servico_wazuh":
             target = arguments.get("target", "").strip()
             if not target:
                 raise ValueError("Parameter 'target' is required. Use an agent ID or 'manager'.")
@@ -2272,20 +3271,20 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             return _tool_result(f"Restart Result:\n{json.dumps(result, indent=2, default=str)}")
 
         # Verification Tools
-        elif tool_name == "wazuh_check_blocked_ip":
+        elif tool_name == "verificar_ip_bloqueado_wazuh":
             ip_address = validate_ip_address(arguments.get("ip_address"), required=True)
             agent_id = validate_agent_id(arguments.get("agent_id"))
             result = await wazuh_client.check_blocked_ip(ip_address, agent_id)
             _success = True
             return _tool_result(f"Blocked IP Check:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_check_agent_isolation":
+        elif tool_name == "verificar_isolamento_agente_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             result = await wazuh_client.check_agent_isolation(agent_id)
             _success = True
             return _tool_result(f"Agent Isolation Check:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_check_process":
+        elif tool_name == "verificar_processo_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             process_id = arguments.get("process_id")
             if process_id is None:
@@ -2295,14 +3294,14 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             _success = True
             return _tool_result(f"Process Check:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_check_user_status":
+        elif tool_name == "verificar_status_usuario_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             username = validate_username(arguments.get("username"), required=True)
             result = await wazuh_client.check_user_status(agent_id, username)
             _success = True
             return _tool_result(f"User Status Check:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_check_file_quarantine":
+        elif tool_name == "verificar_quarentena_arquivo_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             file_path = validate_file_path(arguments.get("file_path"), required=True)
             result = await wazuh_client.check_file_quarantine(agent_id, file_path)
@@ -2310,39 +3309,265 @@ async def handle_tools_call(params: Dict[str, Any], session: MCPSession) -> Dict
             return _tool_result(f"File Quarantine Check:\n{json.dumps(result, indent=2, default=str)}")
 
         # Rollback Tools
-        elif tool_name == "wazuh_unisolate_host":
+        elif tool_name == "desisolar_host_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             result = await wazuh_client.unisolate_host(agent_id)
             _success = True
             return _tool_result(f"Unisolate Host Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_enable_user":
+        elif tool_name == "habilitar_usuario_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             username = validate_username(arguments.get("username"), required=True)
             result = await wazuh_client.enable_user(agent_id, username)
             _success = True
             return _tool_result(f"Enable User Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_restore_file":
+        elif tool_name == "restaurar_arquivo_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             file_path = validate_file_path(arguments.get("file_path"), required=True)
             result = await wazuh_client.restore_file(agent_id, file_path)
             _success = True
             return _tool_result(f"Restore File Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_firewall_allow":
+        elif tool_name == "permitir_firewall_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             src_ip = validate_ip_address(arguments.get("src_ip"), required=True, param_name="src_ip")
             result = await wazuh_client.firewall_allow(agent_id, src_ip)
             _success = True
             return _tool_result(f"Firewall Allow Result:\n{json.dumps(result, indent=2, default=str)}")
 
-        elif tool_name == "wazuh_host_allow":
+        elif tool_name == "permitir_host_wazuh":
             agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
             src_ip = validate_ip_address(arguments.get("src_ip"), required=True, param_name="src_ip")
             result = await wazuh_client.host_allow(agent_id, src_ip)
             _success = True
             return _tool_result(f"Host Allow Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_alteracoes_fim_agente":
+            agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
+            limit = arguments.get("limit", 100)
+            file_path = arguments.get("file_path")
+            event_type = arguments.get("event_type")
+            result = await wazuh_client.get_agent_fim_changes(agent_id, limit=limit, file_path=file_path, event_type=event_type)
+            _success = True
+            return _tool_result(f"Agent FIM Changes:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_detalhes_regra_wazuh":
+            rule_id = arguments.get("rule_id")
+            if not rule_id:
+                raise ValueError("rule_id is required")
+            result = await wazuh_client.get_rule_details(str(rule_id))
+            _success = True
+            return _tool_result(f"Rule Details:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "testar_mensagem_log_wazuh":
+            log_message = arguments.get("log_message")
+            if not log_message:
+                raise ValueError("log_message is required")
+            location = arguments.get("location", "syslog")
+            result = await wazuh_client.test_log_message(log_message, location=location)
+            _success = True
+            return _tool_result(f"Logtest Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "gerenciar_grupos_agente":
+            action = arguments.get("action")
+            group_id = arguments.get("group_id")
+            agent_id = arguments.get("agent_id")
+            if not action or not group_id:
+                raise ValueError("action and group_id are required")
+            result = await wazuh_client.manage_agent_groups(action, group_id, agent_id=agent_id)
+            _success = True
+            return _tool_result(f"Gerenciamento de Grupos Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "criar_regra_customizada_wazuh":
+            content_xml = arguments.get("content")
+            filename = arguments.get("filename", "local_rules.xml")
+            if not content_xml:
+                raise ValueError("content is required")
+            result = await wazuh_client.create_custom_rule(content_xml, filename=filename)
+            _success = True
+            return _tool_result(f"Criar Regra Customizada Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "modificar_regra_customizada_wazuh":
+            content_xml = arguments.get("content")
+            filename = arguments.get("filename", "local_rules.xml")
+            if not content_xml:
+                raise ValueError("content is required")
+            result = await wazuh_client.modify_custom_rule(content_xml, filename=filename)
+            _success = True
+            return _tool_result(f"Modificar Regra Customizada Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "excluir_regra_customizada_wazuh":
+            filename = arguments.get("filename")
+            if not filename:
+                raise ValueError("filename is required")
+            result = await wazuh_client.delete_custom_rule(filename)
+            _success = True
+            return _tool_result(f"Excluir Regra Customizada Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_resumo_decodificadores_wazuh":
+            result = await wazuh_client.get_decoders_summary()
+            _success = True
+            return _tool_result(f"Resumo Decodificadores Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "criar_decodificador_customizado_wazuh":
+            content_xml = arguments.get("content")
+            filename = arguments.get("filename", "local_decoder.xml")
+            if not content_xml:
+                raise ValueError("content is required")
+            result = await wazuh_client.create_custom_decoder(content_xml, filename=filename)
+            _success = True
+            return _tool_result(f"Criar Decodificador Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "modificar_decodificador_customizado_wazuh":
+            content_xml = arguments.get("content")
+            filename = arguments.get("filename", "local_decoder.xml")
+            if not content_xml:
+                raise ValueError("content is required")
+            result = await wazuh_client.modify_custom_decoder(content_xml, filename=filename)
+            _success = True
+            return _tool_result(f"Modificar Decodificador Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "excluir_decodificador_customizado_wazuh":
+            filename = arguments.get("filename")
+            if not filename:
+                raise ValueError("filename is required")
+            result = await wazuh_client.delete_custom_decoder(filename)
+            _success = True
+            return _tool_result(f"Excluir Decodificador Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "investigar_incidente_wazuh":
+            agent_id = arguments.get("agent_id", "001")
+            alert_id = arguments.get("alert_id")
+            rule_id = arguments.get("rule_id")
+            ioc = arguments.get("ioc")
+            time_range = arguments.get("time_range", "24h")
+            result = await wazuh_client.investigate_incident(
+                agent_id=agent_id, alert_id=alert_id, rule_id=rule_id, ioc=ioc, time_range=time_range
+            )
+            _success = True
+            return _tool_result(f"Investigacao de Incidente Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_resultados_conformidade":
+            agent_id = arguments.get("agent_id", "001")
+            policy_id = arguments.get("policy_id")
+            result_filter = arguments.get("result_filter")
+            limit = arguments.get("limit", 100)
+            result = await wazuh_client.get_sca_checks(agent_id=agent_id, policy_id=policy_id, result_filter=result_filter, limit=limit)
+            _success = True
+            return _tool_result(f"Resultados Conformidade Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_politicas_conformidade":
+            agent_id = arguments.get("agent_id", "001")
+            result = await wazuh_client.get_sca_policies(agent_id=agent_id)
+            _success = True
+            return _tool_result(f"Politicas Conformidade Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_falhas_conformidade":
+            agent_id = arguments.get("agent_id", "001")
+            limit = arguments.get("limit", 100)
+            result = await wazuh_client.get_sca_failures(agent_id=agent_id, limit=limit)
+            _success = True
+            return _tool_result(f"Falhas Conformidade Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_estatisticas_fim":
+            agent_id = arguments.get("agent_id", "001")
+            result = await wazuh_client.get_fim_stats(agent_id=agent_id)
+            _success = True
+            return _tool_result(f"Estatisticas FIM Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "buscar_eventos_fim":
+            agent_id = arguments.get("agent_id", "001")
+            file_path = arguments.get("file_path")
+            limit = arguments.get("limit", 100)
+            result = await wazuh_client.search_fim_events(agent_id=agent_id, file_path=file_path, limit=limit)
+            _success = True
+            return _tool_result(f"Eventos FIM Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_arquivo_monitorado":
+            agent_id = arguments.get("agent_id", "001")
+            file_path = arguments.get("file_path", "")
+            result = await wazuh_client.get_monitored_file(agent_id=agent_id, file_path=file_path)
+            _success = True
+            return _tool_result(f"Arquivo Monitorado Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "buscar_vulnerabilidades_cve":
+            cve_id = arguments.get("cve_id", "")
+            limit = arguments.get("limit", 100)
+            result = await wazuh_client.search_vulnerabilities_by_cve(cve_id=cve_id, limit=limit)
+            _success = True
+            return _tool_result(f"Vulnerabilidades por CVE Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "buscar_vulnerabilidades_pacote":
+            package_name = arguments.get("package_name", "")
+            limit = arguments.get("limit", 100)
+            result = await wazuh_client.search_vulnerabilities_by_package(package_name=package_name, limit=limit)
+            _success = True
+            return _tool_result(f"Vulnerabilidades por Pacote Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "buscar_vulnerabilidades_severidade":
+            severity = arguments.get("severity", "critical")
+            limit = arguments.get("limit", 100)
+            result = await wazuh_client.search_vulnerabilities_by_severity(severity=severity, limit=limit)
+            _success = True
+            return _tool_result(f"Vulnerabilidades por Severidade Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_tecnicas_mitre":
+            limit = arguments.get("limit", 100)
+            result = await wazuh_client.get_mitre_techniques(limit=limit)
+            _success = True
+            return _tool_result(f"Tecnicas MITRE Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "buscar_alertas_por_mitre":
+            mitre_id = arguments.get("mitre_id", "T1059")
+            time_range = arguments.get("time_range", "24h")
+            limit = arguments.get("limit", 50)
+            result = await wazuh_client.search_alerts_by_mitre(mitre_id=mitre_id, time_range=time_range, limit=limit)
+            _success = True
+            return _tool_result(f"Alertas por MITRE Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "estatisticas_mitre":
+            time_range = arguments.get("time_range", "24h")
+            result = await wazuh_client.get_mitre_stats(time_range=time_range)
+            _success = True
+            return _tool_result(f"Estatisticas MITRE Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_dashboard_alertas":
+            time_range = arguments.get("time_range", "24h")
+            result = await wazuh_client.get_alerts_dashboard(time_range=time_range)
+            _success = True
+            return _tool_result(f"Dashboard Alertas Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_dashboard_vulnerabilidades":
+            result = await wazuh_client.get_vulnerability_dashboard()
+            _success = True
+            return _tool_result(f"Dashboard Vulnerabilidades Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "gerar_relatorio_nist":
+            time_range = arguments.get("time_range", "24h")
+            result = await wazuh_client.generate_nist_report(time_range=time_range)
+            _success = True
+            return _tool_result(f"Relatorio NIST Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "gerar_relatorio_cis":
+            agent_id = arguments.get("agent_id", "001")
+            result = await wazuh_client.generate_cis_report(agent_id=agent_id)
+            _success = True
+            return _tool_result(f"Relatorio CIS Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "gerar_relatorio_lgpd":
+            time_range = arguments.get("time_range", "24h")
+            result = await wazuh_client.generate_lgpd_report(time_range=time_range)
+            _success = True
+            return _tool_result(f"Relatorio LGPD Result:\n{json.dumps(result, indent=2, default=str)}")
+
+        elif tool_name == "obter_pacotes_agente":
+            agent_id = validate_agent_id(arguments.get("agent_id"), required=True)
+            limit = arguments.get("limit", 100)
+            search = arguments.get("search")
+            result = await wazuh_client.get_agent_packages(agent_id, limit=limit, search=search)
+            _success = True
+            return _tool_result(f"Agent Packages:\n{json.dumps(result, indent=2, default=str)}")
 
         else:
             raise ValueError(f"Unknown tool: {tool_name}. Use 'tools/list' to see available tools.")

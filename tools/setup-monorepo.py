@@ -144,7 +144,7 @@ version = "1.0.0"
 description = "Shared core library for Wazuh MCP implementations"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [{name = "GenSec AI Team"}]
+authors = [{name = "Nks1097"}]
 keywords = ["wazuh", "security", "mcp", "core"]
 requires-python = ">=3.11"
 dependencies = [
@@ -156,8 +156,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/gensecaihq/Wazuh-MCP-Server"
-Repository = "https://github.com/gensecaihq/Wazuh-MCP-Server"
+Homepage = "https://github.com/nks1097/Wazuh-MCP-Server"
+Repository = "https://github.com/nks1097/Wazuh-MCP-Server"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -178,7 +178,7 @@ version = "2.1.0"
 description = "FastMCP STDIO transport for Wazuh SIEM integration"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [{name = "GenSec AI Team"}]
+authors = [{name = "Nks1097"}]
 keywords = ["wazuh", "security", "mcp", "stdio", "fastmcp"]
 requires-python = ">=3.11"
 dependencies = [
@@ -190,8 +190,8 @@ dependencies = [
 wazuh-mcp-server = "wazuh_mcp_stdio.main:main"
 
 [project.urls]
-Homepage = "https://github.com/gensecaihq/Wazuh-MCP-Server"
-Repository = "https://github.com/gensecaihq/Wazuh-MCP-Server"
+Homepage = "https://github.com/nks1097/Wazuh-MCP-Server"
+Repository = "https://github.com/nks1097/Wazuh-MCP-Server"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -212,7 +212,7 @@ version = "3.0.0"
 description = "Remote MCP server with HTTP/SSE transport for Wazuh"
 readme = "README.md"
 license = {text = "MIT"}
-authors = [{name = "GenSec AI Team"}]
+authors = [{name = "Nks1097"}]
 keywords = ["wazuh", "security", "mcp", "remote", "sse", "http"]
 requires-python = ">=3.11"
 dependencies = [
@@ -228,8 +228,8 @@ dependencies = [
 wazuh-mcp-remote = "wazuh_mcp_remote.main:main"
 
 [project.urls]
-Homepage = "https://github.com/gensecaihq/Wazuh-MCP-Server"
-Repository = "https://github.com/gensecaihq/Wazuh-MCP-Server"
+Homepage = "https://github.com/nks1097/Wazuh-MCP-Server"
+Repository = "https://github.com/nks1097/Wazuh-MCP-Server"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

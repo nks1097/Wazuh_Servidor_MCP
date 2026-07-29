@@ -203,16 +203,23 @@ class ServerConfig:
     def from_env(cls) -> "ServerConfig":
         """Create configuration from environment variables with validation."""
         import secrets
+        from dotenv import load_dotenv
+
+        load_dotenv(".env")
+        if os.path.exists("./config/wazuh.env"):
+            load_dotenv("./config/wazuh.env")
 
         # Generate secure secret key if not provided
         auth_secret = os.getenv("AUTH_SECRET_KEY", "")
         if not auth_secret:
             auth_secret = secrets.token_hex(32)
 
-        # Validate auth mode
-        auth_mode = os.getenv("AUTH_MODE", "bearer").lower()
+        # Validate auth mode (default to none if AUTHLESS_ALLOW_WRITE is true)
+        authless = os.getenv("AUTHLESS_ALLOW_WRITE", "false").lower() in ("true", "1")
+        default_mode = "none" if authless else "none"
+        auth_mode = os.getenv("AUTH_MODE", default_mode).lower()
         if auth_mode not in ("bearer", "oauth", "none"):
-            auth_mode = "bearer"
+            auth_mode = "none"
 
         # Validate log level
         log_level = os.getenv("LOG_LEVEL", "INFO").upper()

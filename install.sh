@@ -533,7 +533,7 @@ show_deployment_summary() {
     echo
     echo -e "${CYAN}🆘 Support:${NC}"
     echo -e "  • Documentation: README.md"
-    echo -e "  • Issues: https://github.com/gensecaihq/Wazuh-MCP-Server/issues"
+    echo -e "  • Issues: https://github.com/nks1097/Wazuh-MCP-Server/issues"
     echo -e "  • Troubleshooting: See README.md troubleshooting section"
     echo
 }

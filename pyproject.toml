@@ -3,13 +3,13 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "wazuh-mcp-server"
+name = "wazuh_servidor_mcp"
 version = "4.2.1"
 description = "Production-grade MCP remote server for Wazuh SIEM integration with SSE transport"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Wazuh MCP Server Project", email = "info@wazuh-mcp-server.org"}
+    {name = "Nks1097", email = "https://github.com/nks1097"}
 ]
 keywords = ["wazuh", "security", "mcp", "sse", "siem", "remote-server"]
 classifiers = [
@@ -62,9 +62,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/gensecaihq/Wazuh-MCP-Server"
-Repository = "https://github.com/gensecaihq/Wazuh-MCP-Server"
-"Bug Tracker" = "https://github.com/gensecaihq/Wazuh-MCP-Server/issues"
+Homepage = "https://github.com/nks1097/Wazuh_Servidor_MCP"
+Repository = "https://github.com/nks1097/Wazuh_Servidor_MCP"
+"Bug Tracker" = "https://github.com/nks1097/Wazuh_Servidor_MCP/issues"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

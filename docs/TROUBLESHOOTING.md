@@ -212,8 +212,8 @@ docker compose up -d
 ## Support Resources
 
 - **Documentation**: [MCP Specification](https://modelcontextprotocol.io/)
-- **Issues**: [GitHub Issues](https://github.com/gensecaihq/Wazuh-MCP-Server/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/gensecaihq/Wazuh-MCP-Server/discussions)
+- **Issues**: [GitHub Issues](https://github.com/nks1097/Wazuh-MCP-Server/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/nks1097/Wazuh-MCP-Server/discussions)
 
 ---
 
