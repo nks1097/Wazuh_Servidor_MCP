@@ -166,7 +166,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      }
    }
    ```
-   **imagem de Exemplo de configuração mcp_config.json para o Antigravity IDE**
+   * imagem de Exemplo de configuração mcp_config.json para o Antigravity IDE
 
    ![Configuração mcp_config.json na Antigravity IDE](docs/images/config_antigravity_json.png)
 
@@ -183,7 +183,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      }
    }
    ```
-    **imagem de Exemplo de configuração mcp_config.json para o LM Studio**
+    * imagem de Exemplo de configuração mcp_config.json para o LM Studio
    
    ![Configuração mcpServers no LM Studio](docs/images/config_lmstudio_json.png)
 
@@ -195,7 +195,7 @@ Para garantir que o servidor MCP consiga se conectar ao Wazuh a partir da sua re
      "C:\\Caminho\\Para\\Wazuh_Servidor_MCP\\wazuh-mcp-bridge.py",
    ]
    ```
-    **imagem de Exemplo de configuração mcp_config.json para o codex**
+    * imagem de Exemplo de configuração mcp_config.json para o codex
    
    ![Configuração config.toml no ChatGPT Codex](docs/images/config_codex_toml.png)
 
