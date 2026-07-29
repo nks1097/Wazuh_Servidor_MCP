@@ -1,3 +1,4 @@
+<img width="460" height="61" alt="Captura de tela 2026-07-29 164211" src="https://github.com/user-attachments/assets/31343226-c4c7-4e96-ac14-73fb07c558cb" />
 # 🛡️ Wazuh Servidor MCP (Model Context Protocol)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
