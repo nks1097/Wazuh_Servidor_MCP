@@ -19,6 +19,14 @@
 
 ---
 
+## 📸 Demonstração
+
+![Demonstração do Wazuh MCP](docs/images/demonstracao.png)
+
+<video src="docs/videos/demonstracao.mp4" controls width="100%"></video>
+
+---
+
 ## 📊 Matriz das 78 Ferramentas de Segurança em Português
 
 | Categoria | Ferramentas | Descrição |
